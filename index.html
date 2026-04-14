@@ -326,13 +326,20 @@ function buildPopup(p){
 }
 
 // ── CAPAS OSM ─────────────────────────────────────────
+// edificios y uso_suelo se cargan lazy (solo cuando el usuario los activa)
 const layers={}, layerVisible={vias:true,vias_principales:true,edificios:true,uso_suelo:true};
+const layerLoaded={vias:false,vias_principales:false,edificios:false,uso_suelo:false};
 const togIds={vias:'tog-vias',vias_principales:'tog-vp',edificios:'tog-edif',uso_suelo:'tog-uso'};
 
-function toggleLayer(name){
+async function toggleLayer(name){
   layerVisible[name]=!layerVisible[name];
   document.getElementById(togIds[name]).classList.toggle('active',layerVisible[name]);
-  if(layers[name]){ layerVisible[name]?map.addLayer(layers[name]):map.removeLayer(layers[name]); }
+  if(layerVisible[name] && !layerLoaded[name]){
+    showNotif('Cargando '+name.replace('_',' ')+'...');
+    await loadLayer(name);
+  } else if(layers[name]){
+    layerVisible[name]?map.addLayer(layers[name]):map.removeLayer(layers[name]);
+  }
   showNotif((layerVisible[name]?'Activa: ':'Oculta: ')+name.replace('_',' '));
 }
 
@@ -341,41 +348,48 @@ async function loadGeoJSON(f){
   catch(e){ return null; }
 }
 
-async function initLayers(){
-  advanceLoad(20,'Cargando capas OSM...');
-  const vias=await loadGeoJSON('vias.geojson');
-  if(vias){
-    layers.vias=L.geoJSON(vias.data,{
+async function loadLayer(name){
+  const data=await loadGeoJSON(name+'.geojson');
+  if(!data){ document.getElementById('cnt-'+{vias:'vias',vias_principales:'vp',edificios:'edif',uso_suelo:'uso'}[name]).textContent='No encontrado'; return; }
+  layerLoaded[name]=true;
+  const cntId={vias:'cnt-vias',vias_principales:'cnt-vp',edificios:'cnt-edif',uso_suelo:'cnt-uso'}[name];
+  const barId={vias:'bar-vias',vias_principales:'bar-vp',edificios:'bar-edif',uso_suelo:'bar-uso'}[name];
+  document.getElementById(cntId).textContent=data.count.toLocaleString('es-CO')+' elementos';
+
+  if(name==='vias'){
+    layers.vias=L.geoJSON(data.data,{
       style:f=>{const h=f.properties.highway||'';return{color:'#e07b39',weight:h.includes('primary')||h.includes('trunk')?3:h.includes('secondary')?2:1,opacity:.8};},
       onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))
-    }).addTo(map);
-    document.getElementById('cnt-vias').textContent=vias.count.toLocaleString('es-CO')+' elementos';
-    document.getElementById('num-vias').textContent=vias.count>999?(vias.count/1000).toFixed(1)+'k':vias.count;
-    document.getElementById('bar-vias').style.height=Math.min(55,Math.max(10,vias.count/30))+'px';
-  } else document.getElementById('cnt-vias').textContent='No encontrado';
-
-  const vp=await loadGeoJSON('vias_principales.geojson');
-  if(vp){
-    layers.vias_principales=L.geoJSON(vp.data,{style:{color:'#ff6b35',weight:2.5,opacity:.9},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))}).addTo(map);
-    document.getElementById('cnt-vp').textContent=vp.count.toLocaleString('es-CO')+' elementos';
-    document.getElementById('bar-vp').style.height=Math.min(55,Math.max(10,vp.count/5))+'px';
-  } else document.getElementById('cnt-vp').textContent='No encontrado';
-
-  const edif=await loadGeoJSON('edificios.geojson');
-  if(edif){
-    layers.edificios=L.geoJSON(edif.data,{style:{color:'#4a9eff',weight:1,opacity:.8,fillColor:'#4a9eff',fillOpacity:.15},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))}).addTo(map);
-    document.getElementById('cnt-edif').textContent=edif.count.toLocaleString('es-CO')+' elementos';
-    document.getElementById('num-edif').textContent=edif.count>999?(edif.count/1000).toFixed(1)+'k':edif.count;
-    document.getElementById('bar-edif').style.height=Math.min(55,Math.max(10,edif.count/10))+'px';
-  } else document.getElementById('cnt-edif').textContent='No encontrado';
-
-  const uso=await loadGeoJSON('uso_suelo.geojson');
-  if(uso){
+    });
+    document.getElementById('num-vias').textContent=data.count>999?(data.count/1000).toFixed(1)+'k':data.count;
+    document.getElementById(barId).style.height=Math.min(55,Math.max(10,data.count/30))+'px';
+  } else if(name==='vias_principales'){
+    layers.vias_principales=L.geoJSON(data.data,{style:{color:'#ff6b35',weight:2.5,opacity:.9},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))});
+    document.getElementById(barId).style.height=Math.min(55,Math.max(10,data.count/5))+'px';
+  } else if(name==='edificios'){
+    layers.edificios=L.geoJSON(data.data,{style:{color:'#4a9eff',weight:1,opacity:.8,fillColor:'#4a9eff',fillOpacity:.15},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))});
+    document.getElementById('num-edif').textContent=data.count>999?(data.count/1000).toFixed(1)+'k':data.count;
+    document.getElementById(barId).style.height=Math.min(55,Math.max(10,data.count/10))+'px';
+  } else if(name==='uso_suelo'){
     const cm={residential:'#4a9eff',commercial:'#ff6b35',industrial:'#ffa500',forest:'#1a7a2e',park:'#39d353',grass:'#5dde6a',farmland:'#c8b44a',water:'#0077be'};
-    layers.uso_suelo=L.geoJSON(uso.data,{style:f=>{const c=cm[f.properties.landuse||f.properties.leisure]||'#39d353';return{color:c,weight:.5,opacity:.6,fillColor:c,fillOpacity:.25};},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))}).addTo(map);
-    document.getElementById('cnt-uso').textContent=uso.count.toLocaleString('es-CO')+' elementos';
-    document.getElementById('bar-uso').style.height=Math.min(55,Math.max(10,uso.count*2))+'px';
-  } else document.getElementById('cnt-uso').textContent='No encontrado';
+    layers.uso_suelo=L.geoJSON(data.data,{style:f=>{const c=cm[f.properties.landuse||f.properties.leisure]||'#39d353';return{color:c,weight:.5,opacity:.6,fillColor:c,fillOpacity:.25};},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))});
+    document.getElementById(barId).style.height=Math.min(55,Math.max(10,data.count*2))+'px';
+  }
+  if(layerVisible[name]) map.addLayer(layers[name]);
+}
+
+async function initLayers(){
+  advanceLoad(20,'Cargando vías...');
+  // Vías ligeras: carga inmediata al inicio
+  await loadLayer('vias');
+  await loadLayer('vias_principales');
+  // Capas pesadas: se marcan como "pendiente" y se cargan al activar
+  document.getElementById('cnt-edif').textContent='Click para cargar';
+  document.getElementById('cnt-uso').textContent='Click para cargar';
+  layerVisible.edificios=false;
+  layerVisible.uso_suelo=false;
+  document.getElementById('tog-edif').classList.remove('active');
+  document.getElementById('tog-uso').classList.remove('active');
 }
 
 // ── TRAFICO TOMTOM ────────────────────────────────────
