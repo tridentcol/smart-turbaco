@@ -100,38 +100,13 @@
   .loading-bar-bg{width:300px;height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
   .loading-bar{height:100%;background:var(--accent);width:0%;transition:width .4s ease;border-radius:2px;}
   .loading-msg{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:12px;letter-spacing:.1em;}
-  #ai-panel{position:fixed;bottom:0;right:240px;width:340px;background:var(--panel);border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;z-index:2000;box-shadow:0 -4px 24px rgba(0,0,0,.5);}
-  #ai-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);border-radius:12px 12px 0 0;user-select:none;}
-  #ai-header:hover{background:rgba(255,255,255,.03);}
-  #ai-body{display:flex;flex-direction:column;height:300px;overflow:hidden;transition:height .3s ease;}
-  #ai-body.collapsed{height:0;}
-  #chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
-  #chat-messages::-webkit-scrollbar{width:3px;}
-  #chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-  .chat-msg{display:flex;}
-  .chat-msg.user{justify-content:flex-end;}
-  .chat-msg.assistant{justify-content:flex-start;}
-  .msg-bubble{max-width:86%;padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.55;font-family:'Syne',sans-serif;}
-  .chat-msg.user .msg-bubble{background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.25);color:var(--text);border-radius:12px 12px 4px 12px;}
-  .chat-msg.assistant .msg-bubble{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);border-radius:12px 12px 12px 4px;}
-  .typing{display:flex;gap:4px;padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px 12px 12px 4px;}
-  .typing span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:bounce 1s infinite;}
-  .typing span:nth-child(2){animation-delay:.15s;}
-  .typing span:nth-child(3){animation-delay:.3s;}
-  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-  #chat-bar{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--border);}
-  #chat-input{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Syne',sans-serif;font-size:12px;color:var(--text);outline:none;transition:border-color .2s;}
-  #chat-input:focus{border-color:var(--accent);}
-  #chat-input::placeholder{color:var(--text-muted);}
-  #chat-bar button{background:var(--accent);border:none;border-radius:8px;width:34px;color:#000;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
-  #chat-bar button:hover{opacity:.8;}
 </style>
 </head>
 <body>
 
 <div id="loading">
   <div class="loading-title">TURBACO</div>
-  <div class="loading-sub">SMART CITY · GEMELO DIGITAL v0.2</div>
+  <div class="loading-sub">SMART CITY · GEMELO DIGITAL v0.3</div>
   <div class="loading-bar-bg"><div class="loading-bar" id="lbar"></div></div>
   <div class="loading-msg" id="lmsg">Iniciando sistema...</div>
 </div>
@@ -281,7 +256,7 @@
         <div>Tráfico: <span style="color:var(--accent)">TomTom API</span></div>
         <div>Clima: <span style="color:var(--accent)">Open-Meteo</span></div>
         <div>Datos: <span style="color:var(--accent)">OSM / QGIS</span></div>
-        <div>Versión: <span style="color:var(--accent)">0.2.0</span></div>
+        <div>Versión: <span style="color:var(--accent)">0.3.0</span></div>
         <div>Estado: <span style="color:var(--accent3)">● Activo</span></div>
       </div>
     </div>
@@ -289,23 +264,6 @@
 </div>
 
 <div class="notif" id="notif"></div>
-
-<div id="ai-panel">
-  <div id="ai-header" onclick="toggleAI()">
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="width:8px;height:8px;background:#00d4ff;border-radius:50%;animation:pulse 2s infinite"></div>
-      <span style="font-size:12px;font-weight:600;color:#fff;font-family:'Syne',sans-serif">Asistente IA · Tráfico Turbaco</span>
-    </div>
-    <span id="ai-chevron" style="color:#586069;font-size:12px">▲</span>
-  </div>
-  <div id="ai-body">
-    <div id="chat-messages"></div>
-    <div id="chat-bar">
-      <input id="chat-input" type="text" placeholder="¿Hay tráfico hacia Cartagena?" autocomplete="off"/>
-      <button onclick="sendChat()">▶</button>
-    </div>
-  </div>
-</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -316,7 +274,8 @@ const TOMTOM_KEY = '6I2QphRaUEuYlrUGpXJshaOyvGpMzFwp';
 // ══════════════════════════════════════════════════════
 
 const LAT = 10.3281, LON = -75.3664;
-const BBOX = '10.28,-75.44,10.40,-75.27';
+// TomTom bbox: minLon,minLat,maxLon,maxLat (SW→NE)
+const BBOX = '-75.44,10.28,-75.27,10.40';
 
 // Reloj
 setInterval(() => {
@@ -515,7 +474,7 @@ async function fetchClima(){
       <div class="popup-title">🌡️ Estación Climática — Turbaco</div>
       <div class="popup-row"><span class="popup-key">Temperatura</span><span class="popup-val">${c.temperature_2m}°C</span></div>
       <div class="popup-row"><span class="popup-key">Humedad</span><span class="popup-val">${c.relative_humidity_2m}%</span></div>
-      <div class="popup-row"><span class="popup-key">Viento</span><span class="popup-val">${c.wind_speed_10m} km/h ${dirs[Math.round(c.wind_direction_10m/45)%8]}</span></div>
+      <div class="popup-row"><span class="popup-key">Viento</span><span class="popup-val">${c.wind_speed_10m} km/h ${dirs[Math.round((c.wind_direction_10m??0)/45)%8]??'N'}</span></div>
       <div class="popup-row"><span class="popup-key">Lluvia</span><span class="popup-val">${c.precipitation} mm</span></div>
       <div style="font-size:9px;color:#586069;margin-top:6px">Open-Meteo · ${new Date().toLocaleTimeString('es-CO')}</div>
     </div>`);
@@ -525,51 +484,6 @@ async function fetchClima(){
 // ── CURSOR / ZOOM ─────────────────────────────────────
 map.on('mousemove',e=>{ document.getElementById('cur-lat').textContent=e.latlng.lat.toFixed(6); document.getElementById('cur-lon').textContent=e.latlng.lng.toFixed(6); });
 map.on('zoomend moveend',()=>{ const c=map.getCenter(); document.getElementById('stat-lat').textContent=c.lat.toFixed(4)+'°N'; document.getElementById('stat-lon').textContent=Math.abs(c.lng).toFixed(4)+'°W'; document.getElementById('stat-zoom').textContent=map.getZoom(); });
-
-// ── ASISTENTE IA ──────────────────────────────────────
-let chatHistory=[];
-function toggleAI(){ const b=document.getElementById('ai-body'); b.classList.toggle('collapsed'); document.getElementById('ai-chevron').textContent=b.classList.contains('collapsed')?'▼':'▲'; }
-function addChatMsg(role,text,loading=false){
-  const box=document.getElementById('chat-messages'),div=document.createElement('div');
-  div.className='chat-msg '+role; if(loading) div.id='msg-loading';
-  div.innerHTML=loading?'<span class="typing"><span></span><span></span><span></span></span>':`<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
-  box.appendChild(div); box.scrollTop=box.scrollHeight;
-}
-function updateLastMsg(text){ const el=document.getElementById('msg-loading'); if(el){ el.removeAttribute('id'); el.innerHTML=`<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`; document.getElementById('chat-messages').scrollTop=99999; } }
-
-async function askAI(msg){
-  addChatMsg('user',msg); addChatMsg('assistant','...',true);
-  chatHistory.push({role:'user',content:msg});
-  const incRes=incData.slice(0,8).map(i=>{const p=i.properties||{};return `${p.iconCategory||'?'}: ${p.description||''} | ${p.from||'?'}→${p.to||'?'} | ${p.delay?Math.round(p.delay/60)+'min':'?'}`;}).join('\n')||'Sin incidentes';
-  const system=`Eres el asistente de tráfico del Gemelo Digital de Turbaco, Bolívar, Colombia.
-
-INCIDENTES ACTUALES:
-${incRes}
-
-CLIMA: ${document.getElementById('cl-temp').textContent} | Humedad: ${document.getElementById('cl-hum').textContent} | Viento: ${document.getElementById('cl-viento').textContent} | Lluvia: ${document.getElementById('cl-lluvia').textContent}
-
-Rutas conocidas:
-- Principal: Turbaco→Cartagena por Vía de la Cordialidad
-- Alternativa norte: por Bayunca  
-- Alternativa sur: por Turbana→Arjona
-
-Cuando el usuario pida navegar a un lugar incluye AL FINAL exactamente:
-{"navegar":{"lat":10.XXXX,"lon":-75.XXXX,"zoom":15,"nombre":"Nombre"}}
-
-Responde en español, conciso y útil.`;
-  try{
-    const r=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system,messages:chatHistory})});
-    const d=await r.json(); const text=d.content?.[0]?.text||'Sin respuesta';
-    chatHistory.push({role:'assistant',content:text});
-    if(chatHistory.length>20) chatHistory=chatHistory.slice(-20);
-    const nm=text.match(/\{"navegar":\s*\{[^}]+\}\s*\}/);
-    let display=text;
-    if(nm){ try{ const cmd=JSON.parse(nm[0]),{lat,lon,zoom,nombre}=cmd.navegar; map.setView([lat,lon],zoom||15); const tmp=L.marker([lat,lon],{icon:L.divIcon({className:'',html:`<div style="background:#00d4ff;border:2px solid #fff;border-radius:50%;width:18px;height:18px;box-shadow:0 0 14px #00d4ff"></div>`,iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map).bindPopup(`<div class="popup-content"><div class="popup-title">📍 ${nombre}</div></div>`).openPopup(); setTimeout(()=>map.removeLayer(tmp),8000); display=text.replace(nm[0],'').trim(); showNotif('Navegando a: '+nombre); }catch(e){} }
-    updateLastMsg(display);
-  } catch(e){ updateLastMsg('Inicia proxy.py para usar el asistente IA.'); }
-}
-function sendChat(){ const inp=document.getElementById('chat-input'),msg=inp.value.trim(); if(!msg) return; inp.value=''; askAI(msg); }
-document.getElementById('chat-input').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} });
 
 // ── ARRANQUE ──────────────────────────────────────────
 async function init(){
@@ -582,10 +496,7 @@ async function init(){
   await fetchClima();
   setInterval(fetchClima, 5*60*1000);
   advanceLoad(100,'Smart Turbaco listo.');
-  setTimeout(()=>{ document.getElementById('loading').classList.add('hidden'); showNotif('Smart Turbaco v0.2 activo ✓'); },600);
-  setTimeout(()=>{
-    addChatMsg('assistant','¡Hola! Soy el asistente de tráfico de Turbaco.\n\nPuedo ayudarte con:\n• Estado del tráfico en tiempo real\n• Accidentes e incidentes activos\n• Rutas alternativas a Cartagena\n• Condiciones del clima\n\n¿Cómo está la vía a Cartagena ahora mismo?');
-  },2000);
+  setTimeout(()=>{ document.getElementById('loading').classList.add('hidden'); showNotif('Smart Turbaco v0.3 activo ✓'); },600);
 }
 init();
 </script>
