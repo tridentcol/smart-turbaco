@@ -262,17 +262,17 @@ const BASE_STYLE = {
 // ── MAPA ──────────────────────────────────────────────
 const map = new maplibregl.Map({
   container:'map', style:BASE_STYLE,
-  center:[LON, LAT], zoom:13, pitch:0, bearing:0,
+  center:[LON, LAT], zoom:15, pitch:45, bearing:-10,
   attributionControl:{ compact:true }
 });
 map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 map.addControl(new maplibregl.ScaleControl({ unit:'metric' }), 'bottom-left');
 
-// Toggle inclinación 3D
-let pitch3d = false;
+// Toggle inclinación 3D — arranca activo
+let pitch3d = true;
 const btn3d = document.createElement('button');
-btn3d.className = 'view-btn'; btn3d.style.cssText='position:fixed;bottom:60px;right:250px;z-index:500;font-size:10px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text-muted);cursor:pointer;font-family:Space Mono,monospace;';
-btn3d.textContent = '3D OFF';
+btn3d.className = 'view-btn'; btn3d.style.cssText='position:fixed;bottom:60px;right:250px;z-index:500;font-size:10px;padding:6px 12px;border-radius:6px;border:1px solid var(--accent3);background:var(--panel);color:var(--accent3);cursor:pointer;font-family:Space Mono,monospace;';
+btn3d.textContent = '3D ON';
 btn3d.onclick = () => { pitch3d=!pitch3d; map.easeTo({pitch:pitch3d?45:0, duration:600}); btn3d.textContent=pitch3d?'3D ON':'3D OFF'; btn3d.style.color=pitch3d?'var(--accent3)':'var(--text-muted)'; btn3d.style.borderColor=pitch3d?'var(--accent3)':'var(--border)'; };
 document.body.appendChild(btn3d);
 
@@ -445,10 +445,14 @@ async function fetchClima(){
 
 // ── ARRANQUE ──────────────────────────────────────────
 map.on('load', async () => {
-  advanceLoad(30,'Cargando vías...');
+  advanceLoad(20,'Cargando vías...');
   await loadLayer('vias');
   await loadLayer('vias_principales');
-  advanceLoad(60,'Conectando TomTom...');
+  advanceLoad(50,'Cargando edificios 3D...');
+  layerVisible.edificios = true;
+  document.getElementById('tog-edif').classList.add('active');
+  await loadLayer('edificios');
+  advanceLoad(70,'Conectando TomTom...');
   await fetchIncidentes(); setInterval(fetchIncidentes, 2*60*1000);
   advanceLoad(85,'Cargando clima...');
   await fetchClima(); setInterval(fetchClima, 5*60*1000);
