@@ -8,584 +8,134 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg: #0a0e14;
-    --panel: #111720;
-    --border: #1e2d3d;
-    --accent: #00d4ff;
-    --accent2: #ff6b35;
-    --accent3: #39d353;
-    --text: #c9d1d9;
-    --text-muted: #586069;
-    --vias: #e07b39;
-    --edificios: #4a9eff;
-    --uso_suelo: #39d353;
-    --vias_principales: #ff6b35;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* HEADER */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    height: 56px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    z-index: 1000;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .logo-dot {
-    width: 10px; height: 10px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.3); }
-  }
-
-  .logo-text {
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #fff;
-  }
-
-  .logo-sub {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-  }
-
-  .header-stats {
-    display: flex;
-    gap: 24px;
-  }
-
-  .stat {
-    text-align: right;
-  }
-
-  .stat-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    color: var(--accent);
-    font-weight: 700;
-  }
-
-  .stat-label {
-    font-size: 9px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  /* LAYOUT PRINCIPAL */
-  .main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  /* PANEL IZQUIERDO */
-  .sidebar {
-    width: 260px;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow-y: auto;
-  }
-
-  .sidebar-section {
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .sidebar-title {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-  }
-
-  /* CAPAS */
-  .layer-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s;
-    margin-bottom: 4px;
-  }
-
-  .layer-item:hover { background: rgba(255,255,255,0.04); }
-
-  .layer-toggle {
-    width: 32px; height: 18px;
-    background: var(--border);
-    border-radius: 9px;
-    position: relative;
-    transition: background 0.2s;
-    flex-shrink: 0;
-    cursor: pointer;
-    border: none;
-  }
-
-  .layer-toggle.active { background: var(--accent); }
-
-  .layer-toggle::after {
-    content: '';
-    position: absolute;
-    width: 12px; height: 12px;
-    background: #fff;
-    border-radius: 50%;
-    top: 3px; left: 3px;
-    transition: transform 0.2s;
-  }
-
-  .layer-toggle.active::after { transform: translateX(14px); }
-
-  .layer-color {
-    width: 10px; height: 10px;
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
-
-  .layer-info { flex: 1; }
-
-  .layer-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .layer-count {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--text-muted);
-  }
-
-  /* IOT SENSORES */
-  .sensor-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 8px;
-    background: rgba(0,212,255,0.03);
-  }
-
-  .sensor-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent3);
-    animation: pulse 1.5s infinite;
-    flex-shrink: 0;
-  }
-
-  .sensor-dot.offline { background: var(--text-muted); animation: none; }
-
-  .sensor-info { flex: 1; }
-
-  .sensor-name {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .sensor-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--accent);
-  }
-
-  .sensor-tag {
-    font-size: 9px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: rgba(0,212,255,0.1);
-    color: var(--accent);
-    border: 1px solid rgba(0,212,255,0.2);
-  }
-
-  /* COORDENADAS */
-  .coords-box {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px;
-  }
-
-  .coords-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-  }
-
-  .coords-label {
-    font-size: 9px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .coords-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--accent);
-  }
-
-  /* MAPA */
-  #map {
-    flex: 1;
-    background: #0a0e14;
-  }
-
-  /* Leaflet overrides */
-  .leaflet-container { background: #0a0e14 !important; }
-
-  .leaflet-control-zoom {
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    overflow: hidden;
-  }
-
-  .leaflet-control-zoom a {
-    background: var(--panel) !important;
-    color: var(--text) !important;
-    border-bottom: 1px solid var(--border) !important;
-    font-size: 16px !important;
-    line-height: 28px !important;
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  .leaflet-control-zoom a:hover {
-    background: var(--border) !important;
-    color: var(--accent) !important;
-  }
-
-  .leaflet-control-attribution {
-    background: rgba(10,14,20,0.8) !important;
-    color: var(--text-muted) !important;
-    font-size: 9px !important;
-  }
-
-  .leaflet-control-attribution a { color: var(--accent) !important; }
-
-  /* Popup personalizado */
-  .leaflet-popup-content-wrapper {
-    background: var(--panel) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
-    color: var(--text) !important;
-  }
-
-  .leaflet-popup-tip { background: var(--panel) !important; }
-
-  .popup-content { padding: 4px; }
-
-  .popup-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 6px;
-  }
-
-  .popup-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 3px;
-  }
-
-  .popup-key {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--text-muted);
-    min-width: 70px;
-  }
-
-  .popup-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--accent);
-  }
-
-  /* PANEL DERECHO */
-  .right-panel {
-    width: 220px;
-    background: var(--panel);
-    border-left: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-  }
-
-  .mini-chart {
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .chart-title {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-  }
-
-  .bar-chart {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    height: 60px;
-  }
-
-  .bar {
-    flex: 1;
-    background: var(--accent);
-    border-radius: 2px 2px 0 0;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    position: relative;
-  }
-
-  .bar:hover { opacity: 1; }
-
-  .bar-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 8px;
-    color: var(--text-muted);
-    text-align: center;
-    margin-top: 4px;
-  }
-
-  .status-grid {
-    padding: 16px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .status-card {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 8px;
-    text-align: center;
-  }
-
-  .status-icon {
-    font-size: 18px;
-    margin-bottom: 4px;
-  }
-
-  .status-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .status-desc {
-    font-size: 9px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  /* NOTIFICACION */
-  .notif {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--panel);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    z-index: 9999;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-  }
-
-  .notif.show { transform: translateX(-50%) translateY(0); }
-
-  /* LOADING */
-  #loading {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    transition: opacity 0.5s;
-  }
-
-  #loading.hidden { opacity: 0; pointer-events: none; }
-
-  .loading-title {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    color: #fff;
-    margin-bottom: 8px;
-  }
-
-  .loading-sub {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.15em;
-    margin-bottom: 32px;
-  }
-
-  .loading-bar-bg {
-    width: 300px;
-    height: 2px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .loading-bar {
-    height: 100%;
-    background: var(--accent);
-    width: 0%;
-    transition: width 0.4s ease;
-    border-radius: 2px;
-  }
-
-  .loading-msg {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-top: 12px;
-    letter-spacing: 0.1em;
-  }
-
-  /* CLIMA GRID */
-  .clima-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .clima-card {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 6px;
-    text-align: center;
-    transition: border-color 0.2s;
-  }
-
-  .clima-card:hover { border-color: var(--accent); }
-
-  .clima-icon { font-size: 16px; margin-bottom: 2px; }
-
-  .clima-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--accent);
-    line-height: 1.2;
-  }
-
-  .clima-label {
-    font-size: 8px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 2px;
-  }
-
-  /* MAPA BASE SELECTOR */
-  .base-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    transition: border-color 0.15s, background 0.15s;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .base-btn:hover { background: rgba(255,255,255,0.04); }
-
-  .base-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,212,255,0.05);
-  }
-
-  .base-preview {
-    width: 28px;
-    height: 20px;
-    border-radius: 3px;
-    flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  /* scrollbar */
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    --bg:#0a0e14; --panel:#111720; --border:#1e2d3d;
+    --accent:#00d4ff; --accent2:#ff6b35; --accent3:#39d353;
+    --text:#c9d1d9; --text-muted:#586069;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;z-index:1000;}
+  .logo{display:flex;align-items:center;gap:12px;}
+  .logo-dot{width:10px;height:10px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+  .logo-text{font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#fff;}
+  .logo-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.08em;}
+  .header-stats{display:flex;gap:24px;}
+  .stat{text-align:right;}
+  .stat-val{font-family:'Space Mono',monospace;font-size:13px;color:var(--accent);font-weight:700;}
+  .stat-label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;}
+  .main{display:flex;flex:1;overflow:hidden;}
+  .sidebar{width:260px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+  .sidebar::-webkit-scrollbar{width:4px;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  .sidebar-section{padding:16px;border-bottom:1px solid var(--border);}
+  .sidebar-title{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--text-muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+  .base-btn{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);transition:border-color .15s,background .15s;font-size:12px;color:var(--text-muted);margin-bottom:6px;}
+  .base-btn:hover{background:rgba(255,255,255,.04);}
+  .base-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.05);}
+  .base-preview{width:28px;height:20px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,.1);}
+  .layer-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;margin-bottom:4px;}
+  .layer-toggle{width:32px;height:18px;background:var(--border);border-radius:9px;position:relative;transition:background .2s;flex-shrink:0;cursor:pointer;border:none;}
+  .layer-toggle.active{background:var(--accent);}
+  .layer-toggle::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;}
+  .layer-toggle.active::after{transform:translateX(14px);}
+  .layer-color{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+  .layer-info{flex:1;}
+  .layer-name{font-size:12px;font-weight:600;color:var(--text);}
+  .layer-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);}
+  .leyenda-trafico{display:flex;gap:8px;margin-top:8px;}
+  .ley-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text-muted);}
+  .ley-dot{width:8px;height:8px;border-radius:50%;}
+  .incidente-item{display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:border-color .2s;}
+  .incidente-item:hover{border-color:var(--accent2);}
+  .incidente-icon{font-size:16px;flex-shrink:0;}
+  .incidente-info{flex:1;}
+  .incidente-titulo{font-size:11px;font-weight:600;color:var(--text);}
+  .incidente-desc{font-size:10px;color:var(--text-muted);margin-top:2px;line-height:1.4;}
+  .incidente-empty{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);text-align:center;padding:12px;}
+  .clima-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+  .clima-card{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;}
+  .clima-icon{font-size:16px;margin-bottom:2px;}
+  .clima-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);line-height:1.2;}
+  .clima-label{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+  .sensor-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+  .sensor-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3);flex-shrink:0;}
+  .sensor-dot.offline{background:var(--text-muted);animation:none!important;}
+  .sensor-name{font-size:11px;font-weight:600;color:var(--text);}
+  .sensor-val{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);}
+  .coords-box{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;padding:10px;}
+  .coords-row{display:flex;justify-content:space-between;margin-bottom:4px;}
+  .coords-label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;}
+  .coords-val{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);}
+  #map{flex:1;background:#0a0e14;}
+  .leaflet-container{background:#0a0e14!important;}
+  .leaflet-control-zoom{border:1px solid var(--border)!important;border-radius:8px!important;overflow:hidden;}
+  .leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-bottom:1px solid var(--border)!important;width:28px!important;height:28px!important;line-height:28px!important;}
+  .leaflet-control-zoom a:hover{background:var(--border)!important;color:var(--accent)!important;}
+  .leaflet-control-attribution{background:rgba(10,14,20,.8)!important;color:var(--text-muted)!important;font-size:9px!important;}
+  .leaflet-popup-content-wrapper{background:var(--panel)!important;border:1px solid var(--border)!important;border-radius:8px!important;box-shadow:0 8px 32px rgba(0,0,0,.6)!important;color:var(--text)!important;}
+  .leaflet-popup-tip{background:var(--panel)!important;}
+  .popup-content{padding:4px;}
+  .popup-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:6px;}
+  .popup-row{display:flex;gap:8px;margin-bottom:3px;}
+  .popup-key{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);min-width:70px;}
+  .popup-val{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);}
+  .right-panel{width:220px;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+  .mini-chart{padding:16px;border-bottom:1px solid var(--border);}
+  .chart-title{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--text-muted);margin-bottom:12px;}
+  .bar-chart{display:flex;align-items:flex-end;gap:4px;height:60px;}
+  .bar{flex:1;border-radius:2px 2px 0 0;opacity:.7;}
+  .bar-label{font-family:'Space Mono',monospace;font-size:8px;color:var(--text-muted);text-align:center;margin-top:4px;}
+  .status-grid{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .status-card{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center;}
+  .status-icon{font-size:18px;margin-bottom:4px;}
+  .status-num{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--accent);}
+  .status-desc{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;}
+  .notif{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:10px 20px;font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);z-index:9999;transition:transform .3s ease;white-space:nowrap;}
+  .notif.show{transform:translateX(-50%) translateY(0);}
+  #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s;}
+  #loading.hidden{opacity:0;pointer-events:none;}
+  .loading-title{font-size:28px;font-weight:800;letter-spacing:.1em;color:#fff;margin-bottom:8px;}
+  .loading-sub{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.15em;margin-bottom:32px;}
+  .loading-bar-bg{width:300px;height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .loading-bar{height:100%;background:var(--accent);width:0%;transition:width .4s ease;border-radius:2px;}
+  .loading-msg{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:12px;letter-spacing:.1em;}
+  #ai-panel{position:fixed;bottom:0;right:240px;width:340px;background:var(--panel);border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;z-index:2000;box-shadow:0 -4px 24px rgba(0,0,0,.5);}
+  #ai-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);border-radius:12px 12px 0 0;user-select:none;}
+  #ai-header:hover{background:rgba(255,255,255,.03);}
+  #ai-body{display:flex;flex-direction:column;height:300px;overflow:hidden;transition:height .3s ease;}
+  #ai-body.collapsed{height:0;}
+  #chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+  #chat-messages::-webkit-scrollbar{width:3px;}
+  #chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .chat-msg{display:flex;}
+  .chat-msg.user{justify-content:flex-end;}
+  .chat-msg.assistant{justify-content:flex-start;}
+  .msg-bubble{max-width:86%;padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.55;font-family:'Syne',sans-serif;}
+  .chat-msg.user .msg-bubble{background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.25);color:var(--text);border-radius:12px 12px 4px 12px;}
+  .chat-msg.assistant .msg-bubble{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);border-radius:12px 12px 12px 4px;}
+  .typing{display:flex;gap:4px;padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px 12px 12px 4px;}
+  .typing span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:bounce 1s infinite;}
+  .typing span:nth-child(2){animation-delay:.15s;}
+  .typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+  #chat-bar{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--border);}
+  #chat-input{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Syne',sans-serif;font-size:12px;color:var(--text);outline:none;transition:border-color .2s;}
+  #chat-input:focus{border-color:var(--accent);}
+  #chat-input::placeholder{color:var(--text-muted);}
+  #chat-bar button{background:var(--accent);border:none;border-radius:8px;width:34px;color:#000;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+  #chat-bar button:hover{opacity:.8;}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loading">
   <div class="loading-title">TURBACO</div>
-  <div class="loading-sub">GEMELO DIGITAL · AGM DESARROLLOS</div>
-  <div class="loading-bar-bg">
-    <div class="loading-bar" id="lbar"></div>
-  </div>
+  <div class="loading-sub">SMART CITY · GEMELO DIGITAL v0.2</div>
+  <div class="loading-bar-bg"><div class="loading-bar" id="lbar"></div></div>
   <div class="loading-msg" id="lmsg">Iniciando sistema...</div>
 </div>
 
-<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-dot"></div>
@@ -595,849 +145,449 @@
     </div>
   </div>
   <div class="header-stats">
-    <div class="stat">
-      <div class="stat-val" id="stat-lat">10.3281°N</div>
-      <div class="stat-label">Latitud</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="stat-lon">75.3664°W</div>
-      <div class="stat-label">Longitud</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="stat-zoom">13</div>
-      <div class="stat-label">Zoom</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="reloj">--:--:--</div>
-      <div class="stat-label">Hora local</div>
-    </div>
+    <div class="stat"><div class="stat-val" id="stat-lat">10.3281°N</div><div class="stat-label">Latitud</div></div>
+    <div class="stat"><div class="stat-val" id="stat-lon">75.3664°W</div><div class="stat-label">Longitud</div></div>
+    <div class="stat"><div class="stat-val" id="stat-zoom">13</div><div class="stat-label">Zoom</div></div>
+    <div class="stat"><div class="stat-val" id="stat-incidentes">0</div><div class="stat-label">Incidentes</div></div>
+    <div class="stat"><div class="stat-val" id="reloj">--:--:--</div><div class="stat-label">Hora local</div></div>
   </div>
 </header>
 
-<!-- MAIN -->
 <div class="main">
-
-  <!-- SIDEBAR IZQUIERDO -->
   <div class="sidebar">
 
-    <!-- MAPA BASE -->
     <div class="sidebar-section">
       <div class="sidebar-title">Mapa base</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="base-btn active" id="base-oscuro" onclick="setBase('oscuro')">
-          <div class="base-preview" style="background:linear-gradient(135deg,#0a0e14 50%,#1e2d3d 100%)"></div>
-          <span>Oscuro</span>
-        </div>
-        <div class="base-btn" id="base-satelite" onclick="setBase('satelite')">
-          <div class="base-preview" style="background:linear-gradient(135deg,#1a3a1a 50%,#2d5a2d 100%)"></div>
-          <span>Satélite Google</span>
-        </div>
-        <div class="base-btn" id="base-calles" onclick="setBase('calles')">
-          <div class="base-preview" style="background:linear-gradient(135deg,#e8e0d8 50%,#d4c8b8 100%)"></div>
-          <span>Calles OSM</span>
-        </div>
+      <div class="base-btn active" id="base-oscuro" onclick="setBase('oscuro')">
+        <div class="base-preview" style="background:linear-gradient(135deg,#0a0e14 50%,#1e2d3d 100%)"></div><span>Oscuro</span>
+      </div>
+      <div class="base-btn" id="base-satelite" onclick="setBase('satelite')">
+        <div class="base-preview" style="background:linear-gradient(135deg,#1a3a1a 50%,#2d5a2d 100%)"></div><span>Satélite Google</span>
+      </div>
+      <div class="base-btn" id="base-calles" onclick="setBase('calles')">
+        <div class="base-preview" style="background:linear-gradient(135deg,#e8e0d8 50%,#d4c8b8 100%)"></div><span>Calles OSM</span>
+      </div>
+      <div class="base-btn" id="base-tomtom" onclick="setBase('tomtom')">
+        <div class="base-preview" style="background:linear-gradient(135deg,#1a1a2e 50%,#16213e 100%)"></div><span>TomTom HD</span>
       </div>
     </div>
 
-    <!-- CAPAS -->
     <div class="sidebar-section">
       <div class="sidebar-title">Capas del mapa</div>
-
       <div class="layer-item">
         <button class="layer-toggle active" id="tog-vias" onclick="toggleLayer('vias')"></button>
         <div class="layer-color" style="background:#e07b39"></div>
-        <div class="layer-info">
-          <div class="layer-name">Vías</div>
-          <div class="layer-count" id="cnt-vias">Cargando...</div>
-        </div>
+        <div class="layer-info"><div class="layer-name">Vías</div><div class="layer-count" id="cnt-vias">Cargando...</div></div>
       </div>
-
       <div class="layer-item">
         <button class="layer-toggle active" id="tog-vp" onclick="toggleLayer('vias_principales')"></button>
         <div class="layer-color" style="background:#ff6b35"></div>
-        <div class="layer-info">
-          <div class="layer-name">Vías principales</div>
-          <div class="layer-count" id="cnt-vp">Cargando...</div>
-        </div>
+        <div class="layer-info"><div class="layer-name">Vías principales</div><div class="layer-count" id="cnt-vp">Cargando...</div></div>
       </div>
-
       <div class="layer-item">
         <button class="layer-toggle active" id="tog-edif" onclick="toggleLayer('edificios')"></button>
         <div class="layer-color" style="background:#4a9eff"></div>
-        <div class="layer-info">
-          <div class="layer-name">Edificios</div>
-          <div class="layer-count" id="cnt-edif">Cargando...</div>
-        </div>
+        <div class="layer-info"><div class="layer-name">Edificios</div><div class="layer-count" id="cnt-edif">Cargando...</div></div>
       </div>
-
       <div class="layer-item">
         <button class="layer-toggle active" id="tog-uso" onclick="toggleLayer('uso_suelo')"></button>
         <div class="layer-color" style="background:#39d353"></div>
-        <div class="layer-info">
-          <div class="layer-name">Uso de suelo</div>
-          <div class="layer-count" id="cnt-uso">Cargando...</div>
-        </div>
+        <div class="layer-info"><div class="layer-name">Uso de suelo</div><div class="layer-count" id="cnt-uso">Cargando...</div></div>
       </div>
     </div>
 
-    <!-- SENSORES IoT -->
     <div class="sidebar-section">
-      <div class="sidebar-title" style="display:flex;justify-content:space-between;align-items:center">
-        <span>Estación climática</span>
-        <span class="sensor-dot" id="clima-dot"></span>
+      <div class="sidebar-title">
+        <span>Tráfico en tiempo real</span>
+        <span id="trafico-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);display:inline-block"></span>
       </div>
-
-      <div class="clima-grid">
-        <div class="clima-card">
-          <div class="clima-icon">🌡️</div>
-          <div class="clima-val" id="cl-temp">—</div>
-          <div class="clima-label">Temperatura</div>
-        </div>
-        <div class="clima-card">
-          <div class="clima-icon">💧</div>
-          <div class="clima-val" id="cl-hum">—</div>
-          <div class="clima-label">Humedad</div>
-        </div>
-        <div class="clima-card">
-          <div class="clima-icon">💨</div>
-          <div class="clima-val" id="cl-viento">—</div>
-          <div class="clima-label">Viento</div>
-        </div>
-        <div class="clima-card">
-          <div class="clima-icon">🌧️</div>
-          <div class="clima-val" id="cl-lluvia">—</div>
-          <div class="clima-label">Lluvia</div>
-        </div>
-        <div class="clima-card">
-          <div class="clima-icon">🔽</div>
-          <div class="clima-val" id="cl-presion">—</div>
-          <div class="clima-label">Presión</div>
-        </div>
-        <div class="clima-card">
-          <div class="clima-icon">☁️</div>
-          <div class="clima-val" id="cl-nube">—</div>
-          <div class="clima-label">Nubosidad</div>
-        </div>
+      <div class="layer-item">
+        <button class="layer-toggle active" id="tog-flujo" onclick="toggleTrafico('flujo')"></button>
+        <div class="layer-color" style="background:linear-gradient(to right,#39d353,#ffa500,#e74c3c)"></div>
+        <div class="layer-info"><div class="layer-name">Flujo de tráfico</div><div class="layer-count">Verde / Amarillo / Rojo</div></div>
       </div>
-
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:8px;text-align:right">
-        Actualiza cada 5 min · Open-Meteo API
+      <div class="layer-item">
+        <button class="layer-toggle active" id="tog-incid" onclick="toggleTrafico('incidentes')"></button>
+        <div class="layer-color" style="background:#ff6b35"></div>
+        <div class="layer-info"><div class="layer-name">Incidentes</div><div class="layer-count" id="cnt-incidentes">Cargando...</div></div>
       </div>
+      <div class="leyenda-trafico">
+        <div class="ley-item"><div class="ley-dot" style="background:#39d353"></div>Fluido</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#ffa500"></div>Lento</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#e74c3c"></div>Congestionado</div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:10px;text-align:right">Actualiza cada 2 min · TomTom API</div>
     </div>
 
-    <!-- OTROS SENSORES -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Incidentes activos</div>
+      <div id="lista-incidentes"><div class="incidente-empty">Cargando...</div></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">
+        <span>Estación climática</span>
+        <span class="sensor-dot offline" id="clima-dot"></span>
+      </div>
+      <div class="clima-grid">
+        <div class="clima-card"><div class="clima-icon">🌡️</div><div class="clima-val" id="cl-temp">—</div><div class="clima-label">Temperatura</div></div>
+        <div class="clima-card"><div class="clima-icon">💧</div><div class="clima-val" id="cl-hum">—</div><div class="clima-label">Humedad</div></div>
+        <div class="clima-card"><div class="clima-icon">💨</div><div class="clima-val" id="cl-viento">—</div><div class="clima-label">Viento</div></div>
+        <div class="clima-card"><div class="clima-icon">🌧️</div><div class="clima-val" id="cl-lluvia">—</div><div class="clima-label">Lluvia</div></div>
+        <div class="clima-card"><div class="clima-icon">🔽</div><div class="clima-val" id="cl-presion">—</div><div class="clima-label">Presión</div></div>
+        <div class="clima-card"><div class="clima-icon">☁️</div><div class="clima-val" id="cl-nube">—</div><div class="clima-label">Nubosidad</div></div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:8px;text-align:right">Actualiza cada 5 min · Open-Meteo</div>
+    </div>
+
     <div class="sidebar-section">
       <div class="sidebar-title">Otros sensores</div>
-      <div class="sensor-item">
-        <div class="sensor-dot offline"></div>
-        <div class="sensor-info">
-          <div class="sensor-name">Calidad del aire</div>
-          <div class="sensor-val">Próximamente</div>
-        </div>
-      </div>
-      <div class="sensor-item">
-        <div class="sensor-dot offline"></div>
-        <div class="sensor-info">
-          <div class="sensor-name">Nivel hídrico</div>
-          <div class="sensor-val">Próximamente</div>
-        </div>
-      </div>
+      <div class="sensor-item"><div class="sensor-dot offline"></div><div><div class="sensor-name">Calidad del aire</div><div class="sensor-val">Próximamente</div></div></div>
+      <div class="sensor-item"><div class="sensor-dot offline"></div><div><div class="sensor-name">Nivel hídrico</div><div class="sensor-val">Próximamente</div></div></div>
     </div>
 
-    <!-- COORDENADAS -->
     <div class="sidebar-section">
       <div class="sidebar-title">Posición del cursor</div>
       <div class="coords-box">
-        <div class="coords-row">
-          <span class="coords-label">Lat</span>
-          <span class="coords-val" id="cur-lat">—</span>
-        </div>
-        <div class="coords-row">
-          <span class="coords-label">Lon</span>
-          <span class="coords-val" id="cur-lon">—</span>
-        </div>
+        <div class="coords-row"><span class="coords-label">Lat</span><span class="coords-val" id="cur-lat">—</span></div>
+        <div class="coords-row"><span class="coords-label">Lon</span><span class="coords-val" id="cur-lon">—</span></div>
       </div>
     </div>
 
   </div>
 
-  <!-- MAPA -->
   <div id="map"></div>
 
-  <!-- PANEL DERECHO -->
   <div class="right-panel">
     <div class="mini-chart">
       <div class="chart-title">Cobertura de capas</div>
-      <div class="bar-chart" id="bar-chart">
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-          <div class="bar" id="bar-vias" style="height:40px;background:#e07b39"></div>
-          <div class="bar-label">Vías</div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-          <div class="bar" id="bar-vp" style="height:20px;background:#ff6b35"></div>
-          <div class="bar-label">V.Princ</div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-          <div class="bar" id="bar-edif" style="height:30px;background:#4a9eff"></div>
-          <div class="bar-label">Edif</div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center">
-          <div class="bar" id="bar-uso" style="height:50px;background:#39d353"></div>
-          <div class="bar-label">Suelo</div>
-        </div>
+      <div class="bar-chart">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="bar" id="bar-vias" style="height:40px;background:#e07b39"></div><div class="bar-label">Vías</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="bar" id="bar-vp" style="height:20px;background:#ff6b35"></div><div class="bar-label">V.P</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="bar" id="bar-edif" style="height:30px;background:#4a9eff"></div><div class="bar-label">Edif</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="bar" id="bar-uso" style="height:50px;background:#39d353"></div><div class="bar-label">Suelo</div></div>
       </div>
     </div>
-
     <div class="status-grid">
-      <div class="status-card">
-        <div class="status-icon">🛣️</div>
-        <div class="status-num" id="num-vias">—</div>
-        <div class="status-desc">Vías</div>
-      </div>
-      <div class="status-card">
-        <div class="status-icon">🏠</div>
-        <div class="status-num" id="num-edif">—</div>
-        <div class="status-desc">Edificios</div>
-      </div>
-      <div class="status-card">
-        <div class="status-icon">🌿</div>
-        <div class="status-num" id="num-uso">—</div>
-        <div class="status-desc">Zonas</div>
-      </div>
-      <div class="status-card">
-        <div class="status-icon">📡</div>
-        <div class="status-num">0</div>
-        <div class="status-desc">Sensores</div>
-      </div>
+      <div class="status-card"><div class="status-icon">🛣️</div><div class="status-num" id="num-vias">—</div><div class="status-desc">Vías</div></div>
+      <div class="status-card"><div class="status-icon">🏠</div><div class="status-num" id="num-edif">—</div><div class="status-desc">Edificios</div></div>
+      <div class="status-card"><div class="status-icon">⚠️</div><div class="status-num" id="num-incidentes">0</div><div class="status-desc">Incidentes</div></div>
+      <div class="status-card"><div class="status-icon">📡</div><div class="status-num">1</div><div class="status-desc">Sensores</div></div>
     </div>
-
     <div class="sidebar-section" style="margin-top:auto">
       <div class="sidebar-title">Sistema</div>
       <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.8">
         <div>Motor: <span style="color:var(--accent)">Leaflet 1.9</span></div>
+        <div>Tráfico: <span style="color:var(--accent)">TomTom API</span></div>
+        <div>Clima: <span style="color:var(--accent)">Open-Meteo</span></div>
         <div>Datos: <span style="color:var(--accent)">OSM / QGIS</span></div>
-        <div>Versión: <span style="color:var(--accent)">0.1.0-alpha</span></div>
+        <div>Versión: <span style="color:var(--accent)">0.2.0</span></div>
         <div>Estado: <span style="color:var(--accent3)">● Activo</span></div>
       </div>
     </div>
   </div>
-
 </div>
 
-<!-- NOTIFICACION -->
 <div class="notif" id="notif"></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-// ─── RELOJ ───────────────────────────────────────────
-function tickClock() {
-  const now = new Date();
-  document.getElementById('reloj').textContent =
-    now.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-tickClock();
-setInterval(tickClock, 1000);
-
-// ─── LOADING ──────────────────────────────────────────
-const msgs = [
-  'Iniciando sistema...',
-  'Cargando datos geoespaciales...',
-  'Renderizando capas OSM...',
-  'Configurando visualizador...',
-  'Turbaco listo.'
-];
-let progress = 0;
-const lbar = document.getElementById('lbar');
-const lmsg = document.getElementById('lmsg');
-
-function advanceLoad(pct, msg) {
-  lbar.style.width = pct + '%';
-  lmsg.textContent = msg;
-}
-
-// ─── MAPA BASE ────────────────────────────────────────
-advanceLoad(10, msgs[0]);
-
-const map = L.map('map', {
-  center: [10.3281, -75.3664],
-  zoom: 13,
-  zoomControl: true,
-  attributionControl: true
-});
-
-// Tiles disponibles
-const baseTiles = {
-  oscuro: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap · © CartoDB', maxZoom: 19
-  }),
-  satelite: L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-    attribution: '© Google', maxZoom: 20
-  }),
-  calles: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap', maxZoom: 19
-  })
-};
-
-// Etiquetas oscuras (solo para el modo oscuro)
-const labelTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
-  attribution: '', maxZoom: 19, pane: 'overlayPane'
-});
-
-let currentBase = 'oscuro';
-baseTiles.oscuro.addTo(map);
-labelTile.addTo(map);
-
-function setBase(nombre) {
-  map.removeLayer(baseTiles[currentBase]);
-  currentBase = nombre;
-  baseTiles[nombre].addTo(map);
-  if (nombre === 'oscuro') {
-    if (!map.hasLayer(labelTile)) labelTile.addTo(map);
-  } else {
-    if (map.hasLayer(labelTile)) map.removeLayer(labelTile);
-  }
-  document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('base-' + nombre).classList.add('active');
-  showNotif('Mapa base: ' + nombre);
-}
-
-// ─── ESTADO CAPAS ────────────────────────────────────
-const layers = {};
-const layerVisible = { vias: true, vias_principales: true, edificios: true, uso_suelo: true };
-
-// ─── HELPERS ─────────────────────────────────────────
-function showNotif(msg) {
-  const n = document.getElementById('notif');
-  n.textContent = msg;
-  n.classList.add('show');
-  setTimeout(() => n.classList.remove('show'), 2500);
-}
-
-function buildPopup(props) {
-  if (!props) return '<div class="popup-content"><div class="popup-title">Sin datos</div></div>';
-  const skip = ['osm_id','osm_way_id'];
-  let rows = '';
-  for (const [k, v] of Object.entries(props)) {
-    if (skip.includes(k) || !v || v === 'null') continue;
-    rows += `<div class="popup-row">
-      <span class="popup-key">${k}</span>
-      <span class="popup-val">${v}</span>
-    </div>`;
-  }
-  const title = props.name || props.highway || props.building || props.landuse || 'Elemento';
-  return `<div class="popup-content">
-    <div class="popup-title">${title}</div>
-    ${rows || '<div style="font-size:10px;color:#586069">Sin atributos adicionales</div>'}
-  </div>`;
-}
-
-function updateCount(id, count) {
-  document.getElementById(id).textContent = count.toLocaleString('es-CO') + ' elementos';
-}
-
-// ─── CARGA DE CAPAS ──────────────────────────────────
-async function loadGeoJSON(filename, opts) {
-  try {
-    const r = await fetch(filename);
-    if (!r.ok) throw new Error('No encontrado');
-    const data = await r.json();
-    return { data, count: data.features ? data.features.length : 0 };
-  } catch(e) {
-    console.warn('No se pudo cargar ' + filename + ':', e.message);
-    return null;
-  }
-}
-
-async function initLayers() {
-  advanceLoad(25, msgs[1]);
-
-  // VÍAS
-  const vias = await loadGeoJSON('vias.geojson');
-  if (vias) {
-    layers.vias = L.geoJSON(vias.data, {
-      style: f => {
-        const h = f.properties.highway || '';
-        const w = h.includes('primary') || h.includes('trunk') ? 3 :
-                  h.includes('secondary') ? 2 : 1;
-        return { color: '#e07b39', weight: w, opacity: 0.8 };
-      },
-      onEachFeature: (f, l) => l.bindPopup(buildPopup(f.properties))
-    }).addTo(map);
-    updateCount('cnt-vias', vias.count);
-    document.getElementById('num-vias').textContent = vias.count > 999 ?
-      (vias.count/1000).toFixed(1)+'k' : vias.count;
-    const h = Math.min(55, Math.max(10, vias.count / 30));
-    document.getElementById('bar-vias').style.height = h + 'px';
-  } else {
-    document.getElementById('cnt-vias').textContent = 'Archivo no encontrado';
-    document.getElementById('num-vias').textContent = '—';
-  }
-
-  advanceLoad(50, msgs[2]);
-
-  // VÍAS PRINCIPALES
-  const vp = await loadGeoJSON('vias_principales.geojson');
-  if (vp) {
-    layers.vias_principales = L.geoJSON(vp.data, {
-      style: { color: '#ff6b35', weight: 2.5, opacity: 0.9 },
-      onEachFeature: (f, l) => l.bindPopup(buildPopup(f.properties))
-    }).addTo(map);
-    updateCount('cnt-vp', vp.count);
-    const h = Math.min(55, Math.max(10, vp.count / 5));
-    document.getElementById('bar-vp').style.height = h + 'px';
-  } else {
-    document.getElementById('cnt-vp').textContent = 'Archivo no encontrado';
-  }
-
-  // EDIFICIOS
-  const edif = await loadGeoJSON('edificios.geojson');
-  if (edif) {
-    layers.edificios = L.geoJSON(edif.data, {
-      style: { color: '#4a9eff', weight: 1, opacity: 0.8, fillColor: '#4a9eff', fillOpacity: 0.15 },
-      onEachFeature: (f, l) => l.bindPopup(buildPopup(f.properties))
-    }).addTo(map);
-    updateCount('cnt-edif', edif.count);
-    document.getElementById('num-edif').textContent = edif.count > 999 ?
-      (edif.count/1000).toFixed(1)+'k' : edif.count;
-    const h = Math.min(55, Math.max(10, edif.count / 10));
-    document.getElementById('bar-edif').style.height = h + 'px';
-  } else {
-    document.getElementById('cnt-edif').textContent = 'Archivo no encontrado';
-    document.getElementById('num-edif').textContent = '—';
-  }
-
-  advanceLoad(75, msgs[3]);
-
-  // USO DE SUELO
-  const uso = await loadGeoJSON('uso_suelo.geojson');
-  if (uso) {
-    const colorMap = {
-      residential: '#4a9eff', commercial: '#ff6b35', industrial: '#ffa500',
-      forest: '#1a7a2e', park: '#39d353', grass: '#5dde6a',
-      farmland: '#c8b44a', water: '#0077be', cemetery: '#888'
-    };
-    layers.uso_suelo = L.geoJSON(uso.data, {
-      style: f => {
-        const lu = f.properties.landuse || f.properties.leisure || 'default';
-        const c = colorMap[lu] || '#39d353';
-        return { color: c, weight: 0.5, opacity: 0.6, fillColor: c, fillOpacity: 0.25 };
-      },
-      onEachFeature: (f, l) => l.bindPopup(buildPopup(f.properties))
-    }).addTo(map);
-    updateCount('cnt-uso', uso.count);
-    document.getElementById('num-uso').textContent = uso.count > 999 ?
-      (uso.count/1000).toFixed(1)+'k' : uso.count;
-    const h = Math.min(55, Math.max(10, uso.count * 2));
-    document.getElementById('bar-uso').style.height = h + 'px';
-  } else {
-    document.getElementById('cnt-uso').textContent = 'Archivo no encontrado';
-    document.getElementById('num-uso').textContent = '—';
-  }
-
-  advanceLoad(100, msgs[4]);
-  setTimeout(() => {
-    document.getElementById('loading').classList.add('hidden');
-    showNotif('Gemelo digital de Turbaco cargado ✓');
-  }, 600);
-}
-
-// ─── TOGGLE CAPAS ────────────────────────────────────
-function toggleLayer(name) {
-  const tog = document.getElementById('tog-' + (name === 'vias_principales' ? 'vp' : name === 'uso_suelo' ? 'uso' : name === 'edificios' ? 'edif' : name));
-  layerVisible[name] = !layerVisible[name];
-  if (layerVisible[name]) {
-    tog.classList.add('active');
-    if (layers[name]) map.addLayer(layers[name]);
-  } else {
-    tog.classList.remove('active');
-    if (layers[name]) map.removeLayer(layers[name]);
-  }
-  showNotif((layerVisible[name] ? 'Capa activada: ' : 'Capa oculta: ') + name.replace('_',' '));
-}
-
-// ─── CURSOR COORDS ───────────────────────────────────
-map.on('mousemove', e => {
-  document.getElementById('cur-lat').textContent = e.latlng.lat.toFixed(6);
-  document.getElementById('cur-lon').textContent = e.latlng.lng.toFixed(6);
-});
-
-// ─── ZOOM + HEADER STATS ─────────────────────────────
-map.on('zoomend moveend', () => {
-  const c = map.getCenter();
-  document.getElementById('stat-lat').textContent = c.lat.toFixed(4) + '°N';
-  document.getElementById('stat-lon').textContent = Math.abs(c.lng).toFixed(4) + '°W';
-  document.getElementById('stat-zoom').textContent = map.getZoom();
-});
-
-// ─── CLIMA IoT ────────────────────────────────────────
-const TURBACO_LAT = 10.3281;
-const TURBACO_LON = -75.3664;
-
-// Marcador de estación climática en el mapa
-const climaIcon = L.divIcon({
-  className: '',
-  html: `<div style="
-    width:40px;height:40px;
-    background:rgba(0,212,255,0.15);
-    border:2px solid #00d4ff;
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:18px;
-    box-shadow:0 0 12px rgba(0,212,255,0.4);
-    animation:pulse 2s infinite;
-  ">🌡️</div>`,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20]
-});
-
-const climaMarker = L.marker([TURBACO_LAT, TURBACO_LON], { icon: climaIcon })
-  .addTo(map)
-  .bindPopup('<div class="popup-content"><div class="popup-title">Estación Climática</div><div style="font-size:10px;color:#586069">Cargando datos...</div></div>');
-
-async function fetchClima() {
-  try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${TURBACO_LAT}&longitude=${TURBACO_LON}&current=temperature_2m,relative_humidity_2m,precipitation,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m&timezone=America%2FBogota`;
-    const r = await fetch(url);
-    const data = await r.json();
-    const c = data.current;
-
-    // Actualizar sidebar
-    document.getElementById('cl-temp').textContent    = c.temperature_2m + '°C';
-    document.getElementById('cl-hum').textContent     = c.relative_humidity_2m + '%';
-    document.getElementById('cl-viento').textContent  = c.wind_speed_10m + ' km/h';
-    document.getElementById('cl-lluvia').textContent  = c.precipitation + ' mm';
-    document.getElementById('cl-presion').textContent = c.surface_pressure + ' hPa';
-    document.getElementById('cl-nube').textContent    = c.cloud_cover + '%';
-
-    // Dot verde = online
-    const dot = document.getElementById('clima-dot');
-    dot.classList.remove('offline');
-    dot.style.background = '#39d353';
-    dot.style.animation = 'pulse 1.5s infinite';
-
-    // Actualizar popup del marcador
-    const dir = c.wind_direction_10m;
-    const dirs = ['N','NE','E','SE','S','SO','O','NO'];
-    const dirLabel = dirs[Math.round(dir / 45) % 8];
-
-    climaMarker.setPopupContent(`
-      <div class="popup-content">
-        <div class="popup-title">🌡️ Estación Climática — Turbaco</div>
-        <div class="popup-row"><span class="popup-key">Temperatura</span><span class="popup-val">${c.temperature_2m}°C</span></div>
-        <div class="popup-row"><span class="popup-key">Humedad</span><span class="popup-val">${c.relative_humidity_2m}%</span></div>
-        <div class="popup-row"><span class="popup-key">Viento</span><span class="popup-val">${c.wind_speed_10m} km/h ${dirLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Lluvia</span><span class="popup-val">${c.precipitation} mm</span></div>
-        <div class="popup-row"><span class="popup-key">Presión</span><span class="popup-val">${c.surface_pressure} hPa</span></div>
-        <div class="popup-row"><span class="popup-key">Nubosidad</span><span class="popup-val">${c.cloud_cover}%</span></div>
-        <div style="font-size:9px;color:#586069;margin-top:6px">Open-Meteo · Actualizado: ${new Date().toLocaleTimeString('es-CO')}</div>
-      </div>
-    `);
-
-  } catch(e) {
-    console.warn('Error clima:', e);
-    document.getElementById('cl-temp').textContent = 'Error';
-  }
-}
-
-// Cargar clima al inicio y cada 5 minutos
-fetchClima();
-setInterval(fetchClima, 5 * 60 * 1000);
-
-// ─── INIT ─────────────────────────────────────────────
-initLayers();
-
-// ─── ASISTENTE IA ─────────────────────────────────────
-let geojsonCache = {};
-let chatHistory = [];
-
-async function buildContext() {
-  const files = ['vias.geojson','edificios.geojson','uso_suelo.geojson','vias_principales.geojson'];
-  for (const f of files) {
-    try {
-      const r = await fetch(f);
-      if (r.ok) geojsonCache[f] = await r.json();
-    } catch(e) {}
-  }
-}
-buildContext();
-
-function extractMapSummary() {
-  const summary = {};
-  for (const [file, data] of Object.entries(geojsonCache)) {
-    if (!data.features) continue;
-    const key = file.replace('.geojson','');
-    const sample = data.features.slice(0, 80).map(f => {
-      const p = f.properties || {};
-      return Object.fromEntries(
-        Object.entries(p).filter(([k,v]) => v && v !== 'null' && !['osm_id','osm_way_id'].includes(k))
-      );
-    }).filter(p => Object.keys(p).length > 0);
-    summary[key] = { total: data.features.length, muestra: sample };
-  }
-  return JSON.stringify(summary);
-}
-
-async function askAI(userMsg) {
-  addChatMsg('user', userMsg);
-  addChatMsg('assistant', '...', true);
-
-  const clima = {
-    temperatura: document.getElementById('cl-temp').textContent,
-    humedad: document.getElementById('cl-hum').textContent,
-    viento: document.getElementById('cl-viento').textContent,
-    lluvia: document.getElementById('cl-lluvia').textContent
-  };
-
-  const systemPrompt = `Eres el asistente IA del Gemelo Digital del municipio de Turbaco, Bolivar, Colombia.
-Tu rol es ayudar al usuario a explorar el mapa, identificar lugares, analizar datos geoespaciales y entender el territorio.
-
-DATOS DEL MAPA (muestra de elementos con sus atributos):
-${extractMapSummary()}
-
-CLIMA ACTUAL EN TURBACO:
-${JSON.stringify(clima)}
-
-Cuando el usuario pregunte por un lugar, busca en los datos. Si existe, indica sus coordenadas.
-Tipos de elementos clave:
-- building=residential = casa/vivienda
-- building=commercial = local comercial
-- landuse=residential = zona residencial
-- landuse=commercial = zona comercial
-- amenity=school = colegio
-- amenity=hospital = hospital
-- highway=primary/secondary = vias principales
-
-Responde en espanol, de forma concisa. Cuando el usuario quiera navegar a un lugar conocido, incluye AL FINAL de tu respuesta exactamente este bloque JSON (sin texto despues):
-{"navegar": {"lat": 10.XXX, "lon": -75.XXX, "zoom": 16, "nombre": "Nombre"}}`;
-
-  chatHistory.push({ role: 'user', content: userMsg });
-
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: chatHistory
-      })
-    });
-
-    const data = await resp.json();
-    const text = data.content?.[0]?.text || 'Sin respuesta';
-    chatHistory.push({ role: 'assistant', content: text });
-    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
-
-    // Detectar comando de navegacion
-    const navMatch = text.match(/\{"navegar":\s*\{[^}]+\}\s*\}/);
-    let displayText = text;
-    if (navMatch) {
-      try {
-        const cmd = JSON.parse(navMatch[0]);
-        const { lat, lon, zoom, nombre } = cmd.navegar;
-        map.setView([lat, lon], zoom || 16);
-        const tmpIcon = L.divIcon({
-          className: '',
-          html: `<div style="background:#00d4ff;border:2px solid #fff;border-radius:50%;width:18px;height:18px;box-shadow:0 0 14px #00d4ff"></div>`,
-          iconSize: [18,18], iconAnchor: [9,9]
-        });
-        const tmp = L.marker([lat, lon], { icon: tmpIcon }).addTo(map)
-          .bindPopup(`<div class="popup-content"><div class="popup-title">📍 ${nombre}</div></div>`)
-          .openPopup();
-        setTimeout(() => map.removeLayer(tmp), 8000);
-        displayText = text.replace(navMatch[0], '').trim();
-        showNotif('Navegando a: ' + nombre);
-      } catch(e) {}
-    }
-
-    updateLastMsg(displayText);
-  } catch(e) {
-    updateLastMsg('Error al conectar con la IA.');
-  }
-}
-
-function addChatMsg(role, text, loading = false) {
-  const box = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'chat-msg ' + role;
-  if (loading) div.id = 'msg-loading';
-  div.innerHTML = loading
-    ? '<span class="typing"><span></span><span></span><span></span></span>'
-    : `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-
-function updateLastMsg(text) {
-  const loading = document.getElementById('msg-loading');
-  if (loading) {
-    loading.removeAttribute('id');
-    loading.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
-    document.getElementById('chat-messages').scrollTop = 99999;
-  }
-}
-
-function sendChat() {
-  const inp = document.getElementById('chat-input');
-  const msg = inp.value.trim();
-  if (!msg) return;
-  inp.value = '';
-  askAI(msg);
-}
-
-document.getElementById('chat-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-});
-
-setTimeout(() => {
-  addChatMsg('assistant', 'Hola! Soy el asistente IA del Gemelo Digital de Turbaco. Puedo ayudarte a:\n\n• Ubicar calles, barrios y lugares\n• Identificar edificios y zonas\n• Analizar el territorio\n• Navegar el mapa\n\nQue quieres explorar?');
-}, 1800);
-</script>
-
-<!-- PANEL IA FLOTANTE -->
 <div id="ai-panel">
   <div id="ai-header" onclick="toggleAI()">
     <div style="display:flex;align-items:center;gap:8px">
       <div style="width:8px;height:8px;background:#00d4ff;border-radius:50%;animation:pulse 2s infinite"></div>
-      <span style="font-size:12px;font-weight:600;color:#fff;font-family:'Syne',sans-serif">Asistente IA · Turbaco</span>
+      <span style="font-size:12px;font-weight:600;color:#fff;font-family:'Syne',sans-serif">Asistente IA · Tráfico Turbaco</span>
     </div>
     <span id="ai-chevron" style="color:#586069;font-size:12px">▲</span>
   </div>
   <div id="ai-body">
     <div id="chat-messages"></div>
     <div id="chat-bar">
-      <input id="chat-input" type="text" placeholder="Pregunta sobre el mapa..." autocomplete="off"/>
+      <input id="chat-input" type="text" placeholder="¿Hay tráfico hacia Cartagena?" autocomplete="off"/>
       <button onclick="sendChat()">▶</button>
     </div>
   </div>
 </div>
 
-<style>
-#ai-panel {
-  position: fixed;
-  bottom: 0;
-  right: 240px;
-  width: 340px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
-  z-index: 2000;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
-}
-#ai-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--border);
-  border-radius: 12px 12px 0 0;
-  user-select: none;
-}
-#ai-header:hover { background: rgba(255,255,255,0.03); }
-#ai-body {
-  display: flex;
-  flex-direction: column;
-  height: 320px;
-  overflow: hidden;
-  transition: height 0.3s ease;
-}
-#ai-body.collapsed { height: 0; }
-#chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-#chat-messages::-webkit-scrollbar { width: 3px; }
-#chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-.chat-msg { display: flex; }
-.chat-msg.user { justify-content: flex-end; }
-.chat-msg.assistant { justify-content: flex-start; }
-.msg-bubble {
-  max-width: 86%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1.55;
-  font-family: 'Syne', sans-serif;
-}
-.chat-msg.user .msg-bubble {
-  background: rgba(0,212,255,0.12);
-  border: 1px solid rgba(0,212,255,0.25);
-  color: var(--text);
-  border-radius: 12px 12px 4px 12px;
-}
-.chat-msg.assistant .msg-bubble {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 12px 12px 12px 4px;
-}
-.typing {
-  display: flex;
-  gap: 4px;
-  padding: 10px 14px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  border-radius: 12px 12px 12px 4px;
-}
-.typing span {
-  width: 6px; height: 6px;
-  background: var(--accent);
-  border-radius: 50%;
-  animation: bounce 1s infinite;
-}
-.typing span:nth-child(2) { animation-delay: 0.15s; }
-.typing span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes bounce {
-  0%,60%,100% { transform: translateY(0); }
-  30% { transform: translateY(-6px); }
-}
-#chat-bar {
-  display: flex;
-  gap: 6px;
-  padding: 10px 12px;
-  border-top: 1px solid var(--border);
-}
-#chat-input {
-  flex: 1;
-  background: rgba(0,0,0,0.3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-family: 'Syne', sans-serif;
-  font-size: 12px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s;
-}
-#chat-input:focus { border-color: var(--accent); }
-#chat-input::placeholder { color: var(--text-muted); }
-#chat-bar button {
-  background: var(--accent);
-  border: none;
-  border-radius: 8px;
-  width: 34px;
-  color: #000;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-#chat-bar button:hover { opacity: 0.8; }
-</style>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-function toggleAI() {
-  const body = document.getElementById('ai-body');
-  const chev = document.getElementById('ai-chevron');
-  body.classList.toggle('collapsed');
-  chev.textContent = body.classList.contains('collapsed') ? '▼' : '▲';
+// ══════════════════════════════════════════════════════
+//  ▼▼▼  PON TU API KEY DE TOMTOM AQUÍ ABAJO  ▼▼▼
+// ══════════════════════════════════════════════════════
+const TOMTOM_KEY = '6I2QphRaUEuYlrUGpXJshaOyvGpMzFwp';
+// ══════════════════════════════════════════════════════
+
+const LAT = 10.3281, LON = -75.3664;
+const BBOX = '10.28,-75.44,10.40,-75.27';
+
+// Reloj
+setInterval(() => {
+  document.getElementById('reloj').textContent =
+    new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}, 1000);
+document.getElementById('reloj').textContent =
+  new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+function advanceLoad(p,m){ document.getElementById('lbar').style.width=p+'%'; document.getElementById('lmsg').textContent=m; }
+advanceLoad(5,'Iniciando sistema...');
+
+// ── MAPA ──────────────────────────────────────────────
+const map = L.map('map',{center:[LAT,LON],zoom:13});
+
+const baseTiles = {
+  oscuro:  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB',maxZoom:19}),
+  satelite:L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{attribution:'© Google',maxZoom:20}),
+  calles:  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}),
+  tomtom:  L.tileLayer(`https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${TOMTOM_KEY}&tileSize=256`,{attribution:'© TomTom',maxZoom:20})
+};
+const labelTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:19,pane:'overlayPane'});
+let currentBase='oscuro';
+baseTiles.oscuro.addTo(map); labelTile.addTo(map);
+
+function setBase(n){
+  map.removeLayer(baseTiles[currentBase]); currentBase=n; baseTiles[n].addTo(map);
+  n==='oscuro' ? (!map.hasLayer(labelTile)&&labelTile.addTo(map)) : (map.hasLayer(labelTile)&&map.removeLayer(labelTile));
+  document.querySelectorAll('.base-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('base-'+n).classList.add('active');
+  showNotif('Mapa base: '+n);
 }
+
+function showNotif(msg){
+  const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),2800);
+}
+
+function buildPopup(p){
+  if(!p) return '<div class="popup-content"><div class="popup-title">Sin datos</div></div>';
+  const skip=['osm_id','osm_way_id'];
+  let rows='';
+  for(const [k,v] of Object.entries(p)){
+    if(skip.includes(k)||!v||v==='null') continue;
+    rows+=`<div class="popup-row"><span class="popup-key">${k}</span><span class="popup-val">${v}</span></div>`;
+  }
+  return `<div class="popup-content"><div class="popup-title">${p.name||p.highway||p.building||p.landuse||'Elemento'}</div>${rows||'<div style="font-size:10px;color:#586069">Sin atributos</div>'}</div>`;
+}
+
+// ── CAPAS OSM ─────────────────────────────────────────
+const layers={}, layerVisible={vias:true,vias_principales:true,edificios:true,uso_suelo:true};
+const togIds={vias:'tog-vias',vias_principales:'tog-vp',edificios:'tog-edif',uso_suelo:'tog-uso'};
+
+function toggleLayer(name){
+  layerVisible[name]=!layerVisible[name];
+  document.getElementById(togIds[name]).classList.toggle('active',layerVisible[name]);
+  if(layers[name]){ layerVisible[name]?map.addLayer(layers[name]):map.removeLayer(layers[name]); }
+  showNotif((layerVisible[name]?'Activa: ':'Oculta: ')+name.replace('_',' '));
+}
+
+async function loadGeoJSON(f){
+  try{ const r=await fetch(f); if(!r.ok) throw 0; const d=await r.json(); return{data:d,count:d.features?.length||0}; }
+  catch(e){ return null; }
+}
+
+async function initLayers(){
+  advanceLoad(20,'Cargando capas OSM...');
+  const vias=await loadGeoJSON('vias.geojson');
+  if(vias){
+    layers.vias=L.geoJSON(vias.data,{
+      style:f=>{const h=f.properties.highway||'';return{color:'#e07b39',weight:h.includes('primary')||h.includes('trunk')?3:h.includes('secondary')?2:1,opacity:.8};},
+      onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))
+    }).addTo(map);
+    document.getElementById('cnt-vias').textContent=vias.count.toLocaleString('es-CO')+' elementos';
+    document.getElementById('num-vias').textContent=vias.count>999?(vias.count/1000).toFixed(1)+'k':vias.count;
+    document.getElementById('bar-vias').style.height=Math.min(55,Math.max(10,vias.count/30))+'px';
+  } else document.getElementById('cnt-vias').textContent='No encontrado';
+
+  const vp=await loadGeoJSON('vias_principales.geojson');
+  if(vp){
+    layers.vias_principales=L.geoJSON(vp.data,{style:{color:'#ff6b35',weight:2.5,opacity:.9},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))}).addTo(map);
+    document.getElementById('cnt-vp').textContent=vp.count.toLocaleString('es-CO')+' elementos';
+    document.getElementById('bar-vp').style.height=Math.min(55,Math.max(10,vp.count/5))+'px';
+  } else document.getElementById('cnt-vp').textContent='No encontrado';
+
+  const edif=await loadGeoJSON('edificios.geojson');
+  if(edif){
+    layers.edificios=L.geoJSON(edif.data,{style:{color:'#4a9eff',weight:1,opacity:.8,fillColor:'#4a9eff',fillOpacity:.15},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))}).addTo(map);
+    document.getElementById('cnt-edif').textContent=edif.count.toLocaleString('es-CO')+' elementos';
+    document.getElementById('num-edif').textContent=edif.count>999?(edif.count/1000).toFixed(1)+'k':edif.count;
+    document.getElementById('bar-edif').style.height=Math.min(55,Math.max(10,edif.count/10))+'px';
+  } else document.getElementById('cnt-edif').textContent='No encontrado';
+
+  const uso=await loadGeoJSON('uso_suelo.geojson');
+  if(uso){
+    const cm={residential:'#4a9eff',commercial:'#ff6b35',industrial:'#ffa500',forest:'#1a7a2e',park:'#39d353',grass:'#5dde6a',farmland:'#c8b44a',water:'#0077be'};
+    layers.uso_suelo=L.geoJSON(uso.data,{style:f=>{const c=cm[f.properties.landuse||f.properties.leisure]||'#39d353';return{color:c,weight:.5,opacity:.6,fillColor:c,fillOpacity:.25};},onEachFeature:(f,l)=>l.bindPopup(buildPopup(f.properties))}).addTo(map);
+    document.getElementById('cnt-uso').textContent=uso.count.toLocaleString('es-CO')+' elementos';
+    document.getElementById('bar-uso').style.height=Math.min(55,Math.max(10,uso.count*2))+'px';
+  } else document.getElementById('cnt-uso').textContent='No encontrado';
+}
+
+// ── TRAFICO TOMTOM ────────────────────────────────────
+const flujoTile = L.tileLayer(
+  `https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${TOMTOM_KEY}&tileSize=256`,
+  {opacity:.8,maxZoom:20,pane:'overlayPane'}
+);
+let incLayer=null, incData=[], traficoVis={flujo:true,incidentes:true};
+
+function toggleTrafico(tipo){
+  traficoVis[tipo]=!traficoVis[tipo];
+  document.getElementById(tipo==='flujo'?'tog-flujo':'tog-incid').classList.toggle('active',traficoVis[tipo]);
+  if(tipo==='flujo'){ traficoVis.flujo?flujoTile.addTo(map):map.removeLayer(flujoTile); }
+  else { if(incLayer){ traficoVis.incidentes?map.addLayer(incLayer):map.removeLayer(incLayer); } }
+  showNotif((traficoVis[tipo]?'Activo: ':'Oculto: ')+tipo);
+}
+
+const icoInc={ACCIDENT:'🚗',JAM:'🚦',ROAD_WORK:'🚧',ROAD_CLOSURE:'🚫',HAZARD:'⚠️',WEATHER:'🌧️'};
+const colInc={ACCIDENT:'#e74c3c',JAM:'#f39c12',ROAD_WORK:'#3498db',ROAD_CLOSURE:'#8e44ad',HAZARD:'#ff6b35',WEATHER:'#00d4ff'};
+
+async function fetchIncidentes(){
+  try{
+    const url=`https://api.tomtom.com/traffic/services/5/incidentDetails?key=${TOMTOM_KEY}&bbox=${BBOX}&fields={incidents{type,geometry{type,coordinates},properties{iconCategory,magnitudeOfDelay,from,to,delay,description}}}&language=es-ES&timeValidityFilter=present`;
+    const r=await fetch(url); const d=await r.json();
+    incData=d.incidents||[];
+    const total=incData.length;
+    document.getElementById('cnt-incidentes').textContent=total+' activos';
+    document.getElementById('num-incidentes').textContent=total;
+    document.getElementById('stat-incidentes').textContent=total;
+    const dot=document.getElementById('trafico-dot');
+    dot.style.background='#39d353'; dot.style.animation='pulse 1.5s infinite';
+    if(incLayer) map.removeLayer(incLayer);
+    const markers=[];
+    incData.forEach(inc=>{
+      const p=inc.properties||{}, tipo=p.iconCategory||'HAZARD';
+      const coords=inc.geometry?.coordinates; if(!coords) return;
+      let lat,lon;
+      if(inc.geometry.type==='Point'){[lon,lat]=coords;}
+      else if(inc.geometry.type==='LineString'){[lon,lat]=coords[0];}
+      else return;
+      const m=L.marker([lat,lon],{icon:L.divIcon({
+        className:'',
+        html:`<div style="background:${colInc[tipo]||'#ff6b35'};border:2px solid #fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.4)">${icoInc[tipo]||'⚠️'}</div>`,
+        iconSize:[28,28],iconAnchor:[14,14]
+      })}).bindPopup(`<div class="popup-content">
+        <div class="popup-title">${icoInc[tipo]||'⚠️'} ${p.description||tipo}</div>
+        <div class="popup-row"><span class="popup-key">Desde</span><span class="popup-val">${p.from||'—'}</span></div>
+        <div class="popup-row"><span class="popup-key">Hasta</span><span class="popup-val">${p.to||'—'}</span></div>
+        <div class="popup-row"><span class="popup-key">Demora</span><span class="popup-val">${p.delay?Math.round(p.delay/60)+' min':'—'}</span></div>
+      </div>`);
+      markers.push(m);
+    });
+    incLayer=L.layerGroup(markers);
+    if(traficoVis.incidentes) incLayer.addTo(map);
+    renderIncidentes();
+  } catch(e){
+    document.getElementById('cnt-incidentes').textContent='Verifica tu API key';
+    document.getElementById('lista-incidentes').innerHTML='<div class="incidente-empty">⚠️ Configura TOMTOM_KEY en index.html</div>';
+  }
+}
+
+function renderIncidentes(){
+  const lista=document.getElementById('lista-incidentes');
+  if(!incData.length){ lista.innerHTML='<div class="incidente-empty">✅ Sin incidentes activos</div>'; return; }
+  lista.innerHTML=incData.slice(0,5).map(inc=>{
+    const p=inc.properties||{}, tipo=p.iconCategory||'HAZARD';
+    const coords=inc.geometry?.coordinates; let lat='',lon='';
+    if(coords){ if(inc.geometry.type==='Point'){[lon,lat]=coords;}else if(inc.geometry.type==='LineString'){[lon,lat]=coords[0];} }
+    return `<div class="incidente-item" ${lat?`onclick="map.setView([${lat},${lon}],16)"`:''}>
+      <div class="incidente-icon">${icoInc[tipo]||'⚠️'}</div>
+      <div class="incidente-info">
+        <div class="incidente-titulo">${p.description||tipo}</div>
+        <div class="incidente-desc">${p.from||''}${p.delay?' · '+Math.round(p.delay/60)+'min':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CLIMA ─────────────────────────────────────────────
+const climaMarker=L.marker([LAT,LON],{icon:L.divIcon({className:'',html:`<div style="width:38px;height:38px;background:rgba(0,212,255,.15);border:2px solid #00d4ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 12px rgba(0,212,255,.4)">🌡️</div>`,iconSize:[38,38],iconAnchor:[19,19]})}).addTo(map).bindPopup('<div class="popup-content"><div class="popup-title">Cargando clima...</div></div>');
+
+async function fetchClima(){
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,precipitation,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m&timezone=America%2FBogota`);
+    const d=await r.json(); const c=d.current;
+    document.getElementById('cl-temp').textContent=c.temperature_2m+'°C';
+    document.getElementById('cl-hum').textContent=c.relative_humidity_2m+'%';
+    document.getElementById('cl-viento').textContent=c.wind_speed_10m+' km/h';
+    document.getElementById('cl-lluvia').textContent=c.precipitation+' mm';
+    document.getElementById('cl-presion').textContent=c.surface_pressure+' hPa';
+    document.getElementById('cl-nube').textContent=c.cloud_cover+'%';
+    const dot=document.getElementById('clima-dot');
+    dot.classList.remove('offline'); dot.style.background='#39d353'; dot.style.animation='pulse 1.5s infinite';
+    const dirs=['N','NE','E','SE','S','SO','O','NO'];
+    climaMarker.setPopupContent(`<div class="popup-content">
+      <div class="popup-title">🌡️ Estación Climática — Turbaco</div>
+      <div class="popup-row"><span class="popup-key">Temperatura</span><span class="popup-val">${c.temperature_2m}°C</span></div>
+      <div class="popup-row"><span class="popup-key">Humedad</span><span class="popup-val">${c.relative_humidity_2m}%</span></div>
+      <div class="popup-row"><span class="popup-key">Viento</span><span class="popup-val">${c.wind_speed_10m} km/h ${dirs[Math.round(c.wind_direction_10m/45)%8]}</span></div>
+      <div class="popup-row"><span class="popup-key">Lluvia</span><span class="popup-val">${c.precipitation} mm</span></div>
+      <div style="font-size:9px;color:#586069;margin-top:6px">Open-Meteo · ${new Date().toLocaleTimeString('es-CO')}</div>
+    </div>`);
+  } catch(e){ console.warn('Error clima',e); }
+}
+
+// ── CURSOR / ZOOM ─────────────────────────────────────
+map.on('mousemove',e=>{ document.getElementById('cur-lat').textContent=e.latlng.lat.toFixed(6); document.getElementById('cur-lon').textContent=e.latlng.lng.toFixed(6); });
+map.on('zoomend moveend',()=>{ const c=map.getCenter(); document.getElementById('stat-lat').textContent=c.lat.toFixed(4)+'°N'; document.getElementById('stat-lon').textContent=Math.abs(c.lng).toFixed(4)+'°W'; document.getElementById('stat-zoom').textContent=map.getZoom(); });
+
+// ── ASISTENTE IA ──────────────────────────────────────
+let chatHistory=[];
+function toggleAI(){ const b=document.getElementById('ai-body'); b.classList.toggle('collapsed'); document.getElementById('ai-chevron').textContent=b.classList.contains('collapsed')?'▼':'▲'; }
+function addChatMsg(role,text,loading=false){
+  const box=document.getElementById('chat-messages'),div=document.createElement('div');
+  div.className='chat-msg '+role; if(loading) div.id='msg-loading';
+  div.innerHTML=loading?'<span class="typing"><span></span><span></span><span></span></span>':`<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  box.appendChild(div); box.scrollTop=box.scrollHeight;
+}
+function updateLastMsg(text){ const el=document.getElementById('msg-loading'); if(el){ el.removeAttribute('id'); el.innerHTML=`<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`; document.getElementById('chat-messages').scrollTop=99999; } }
+
+async function askAI(msg){
+  addChatMsg('user',msg); addChatMsg('assistant','...',true);
+  chatHistory.push({role:'user',content:msg});
+  const incRes=incData.slice(0,8).map(i=>{const p=i.properties||{};return `${p.iconCategory||'?'}: ${p.description||''} | ${p.from||'?'}→${p.to||'?'} | ${p.delay?Math.round(p.delay/60)+'min':'?'}`;}).join('\n')||'Sin incidentes';
+  const system=`Eres el asistente de tráfico del Gemelo Digital de Turbaco, Bolívar, Colombia.
+
+INCIDENTES ACTUALES:
+${incRes}
+
+CLIMA: ${document.getElementById('cl-temp').textContent} | Humedad: ${document.getElementById('cl-hum').textContent} | Viento: ${document.getElementById('cl-viento').textContent} | Lluvia: ${document.getElementById('cl-lluvia').textContent}
+
+Rutas conocidas:
+- Principal: Turbaco→Cartagena por Vía de la Cordialidad
+- Alternativa norte: por Bayunca  
+- Alternativa sur: por Turbana→Arjona
+
+Cuando el usuario pida navegar a un lugar incluye AL FINAL exactamente:
+{"navegar":{"lat":10.XXXX,"lon":-75.XXXX,"zoom":15,"nombre":"Nombre"}}
+
+Responde en español, conciso y útil.`;
+  try{
+    const r=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system,messages:chatHistory})});
+    const d=await r.json(); const text=d.content?.[0]?.text||'Sin respuesta';
+    chatHistory.push({role:'assistant',content:text});
+    if(chatHistory.length>20) chatHistory=chatHistory.slice(-20);
+    const nm=text.match(/\{"navegar":\s*\{[^}]+\}\s*\}/);
+    let display=text;
+    if(nm){ try{ const cmd=JSON.parse(nm[0]),{lat,lon,zoom,nombre}=cmd.navegar; map.setView([lat,lon],zoom||15); const tmp=L.marker([lat,lon],{icon:L.divIcon({className:'',html:`<div style="background:#00d4ff;border:2px solid #fff;border-radius:50%;width:18px;height:18px;box-shadow:0 0 14px #00d4ff"></div>`,iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map).bindPopup(`<div class="popup-content"><div class="popup-title">📍 ${nombre}</div></div>`).openPopup(); setTimeout(()=>map.removeLayer(tmp),8000); display=text.replace(nm[0],'').trim(); showNotif('Navegando a: '+nombre); }catch(e){} }
+    updateLastMsg(display);
+  } catch(e){ updateLastMsg('Inicia proxy.py para usar el asistente IA.'); }
+}
+function sendChat(){ const inp=document.getElementById('chat-input'),msg=inp.value.trim(); if(!msg) return; inp.value=''; askAI(msg); }
+document.getElementById('chat-input').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} });
+
+// ── ARRANQUE ──────────────────────────────────────────
+async function init(){
+  await initLayers();
+  advanceLoad(55,'Conectando TomTom...');
+  flujoTile.addTo(map);
+  await fetchIncidentes();
+  setInterval(fetchIncidentes, 2*60*1000);
+  advanceLoad(80,'Cargando clima...');
+  await fetchClima();
+  setInterval(fetchClima, 5*60*1000);
+  advanceLoad(100,'Smart Turbaco listo.');
+  setTimeout(()=>{ document.getElementById('loading').classList.add('hidden'); showNotif('Smart Turbaco v0.2 activo ✓'); },600);
+  setTimeout(()=>{
+    addChatMsg('assistant','¡Hola! Soy el asistente de tráfico de Turbaco.\n\nPuedo ayudarte con:\n• Estado del tráfico en tiempo real\n• Accidentes e incidentes activos\n• Rutas alternativas a Cartagena\n• Condiciones del clima\n\n¿Cómo está la vía a Cartagena ahora mismo?');
+  },2000);
+}
+init();
 </script>
 </body>
 </html>
