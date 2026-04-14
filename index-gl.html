@@ -3,229 +3,392 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gemelo Digital 3D — Turbaco</title>
+<title>Turbaco · Gemelo Digital 3D</title>
 <link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#0a0e14;--panel:#111720;--border:#1e2d3d;--accent:#00d4ff;--accent2:#ff6b35;--accent3:#39d353;--text:#c9d1d9;--text-muted:#586069;}
+:root{
+  --bg:#070b10;--panel:rgba(8,14,22,0.92);--panel-solid:#080e16;
+  --border:rgba(0,212,255,0.15);--border-bright:rgba(0,212,255,0.4);
+  --accent:#00d4ff;--accent2:#ff6b35;--accent3:#39d353;
+  --text:#c9d1d9;--text-muted:#4a5568;
+  --glow:0 0 20px rgba(0,212,255,0.3);
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-header{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;z-index:1000;}
-.logo{display:flex;align-items:center;gap:12px;}
-.logo-dot{width:10px;height:10px;background:var(--accent3);border-radius:50%;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
-.logo-text{font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#fff;}
-.logo-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent3);letter-spacing:.08em;}
-.header-center{display:flex;align-items:center;gap:8px;}
-.view-btn{font-family:'Space Mono',monospace;font-size:10px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;text-decoration:none;transition:border-color .15s,color .15s;}
+
+/* ── HEADER ── */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:52px;flex-shrink:0;z-index:1000;
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-pulse{position:relative;width:28px;height:28px;}
+.logo-pulse::before,.logo-pulse::after{content:'';position:absolute;inset:0;border-radius:50%;}
+.logo-pulse::before{background:rgba(0,212,255,.15);border:1px solid var(--accent);animation:ring 2s infinite;}
+.logo-pulse::after{width:10px;height:10px;background:var(--accent);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px var(--accent);}
+@keyframes ring{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.4);opacity:.3}}
+.logo-text{font-size:13px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#fff;}
+.logo-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:.1em;opacity:.7;}
+.header-center{display:flex;gap:6px;align-items:center;}
+.view-btn{font-family:'Space Mono',monospace;font-size:9px;padding:4px 12px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;text-decoration:none;transition:all .2s;letter-spacing:.05em;}
 .view-btn:hover{border-color:var(--accent);color:var(--accent);}
-.view-btn.active{border-color:var(--accent3);color:var(--accent3);background:rgba(57,211,83,.07);}
-.header-stats{display:flex;gap:24px;}
+.view-btn.active{border-color:var(--accent3);color:var(--accent3);background:rgba(57,211,83,.08);box-shadow:0 0 12px rgba(57,211,83,.2);}
+.header-stats{display:flex;gap:20px;}
 .stat{text-align:right;}
-.stat-val{font-family:'Space Mono',monospace;font-size:13px;color:var(--accent);font-weight:700;}
-.stat-label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;}
-.main{display:flex;flex:1;overflow:hidden;}
-.sidebar{width:260px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
-.sidebar::-webkit-scrollbar{width:4px;}
-.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
-.sidebar-section{padding:16px;border-bottom:1px solid var(--border);}
-.sidebar-title{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--text-muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
-.layer-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;margin-bottom:4px;}
-.layer-toggle{width:32px;height:18px;background:var(--border);border-radius:9px;position:relative;transition:background .2s;flex-shrink:0;cursor:pointer;border:none;}
-.layer-toggle.active{background:var(--accent);}
-.layer-toggle::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;}
-.layer-toggle.active::after{transform:translateX(14px);}
-.layer-color{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
-.layer-info{flex:1;}
-.layer-name{font-size:12px;font-weight:600;color:var(--text);}
-.layer-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);}
-.leyenda-trafico{display:flex;gap:8px;margin-top:8px;}
-.ley-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text-muted);}
-.ley-dot{width:8px;height:8px;border-radius:50%;}
-.incidente-item{display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:border-color .2s;}
-.incidente-item:hover{border-color:var(--accent2);}
-.incidente-icon{font-size:16px;flex-shrink:0;}
-.incidente-info{flex:1;}
-.incidente-titulo{font-size:11px;font-weight:600;color:var(--text);}
-.incidente-desc{font-size:10px;color:var(--text-muted);margin-top:2px;line-height:1.4;}
-.incidente-empty{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);text-align:center;padding:12px;}
-.clima-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
-.clima-card{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;}
-.clima-icon{font-size:16px;margin-bottom:2px;}
+.stat-val{font-family:'Space Mono',monospace;font-size:12px;color:var(--accent);font-weight:700;}
+.stat-label{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;}
+
+/* ── LAYOUT ── */
+.main{display:flex;flex:1;overflow:hidden;position:relative;}
+#map{position:absolute;inset:0;}
+
+/* ── SIDEBAR FLOTANTE ── */
+.sidebar{
+  position:absolute;left:12px;top:12px;bottom:12px;
+  width:240px;z-index:500;
+  display:flex;flex-direction:column;gap:8px;
+  overflow-y:auto;pointer-events:none;
+}
+.sidebar::-webkit-scrollbar{width:0;}
+.sidebar>*{pointer-events:all;}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  backdrop-filter:blur(16px);
+}
+.panel-header{
+  padding:10px 14px;
+  font-size:8px;text-transform:uppercase;letter-spacing:.2em;
+  color:var(--text-muted);
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.panel-body{padding:10px 12px;}
+
+/* ── CAPAS ── */
+.layer-row{display:flex;align-items:center;gap:8px;padding:6px 4px;border-radius:6px;transition:background .15s;}
+.layer-row:hover{background:rgba(255,255,255,.03);}
+.layer-toggle{width:28px;height:16px;background:var(--text-muted);border-radius:8px;position:relative;transition:background .2s;flex-shrink:0;cursor:pointer;border:none;opacity:.5;}
+.layer-toggle.active{background:var(--accent);opacity:1;}
+.layer-toggle::after{content:'';position:absolute;width:10px;height:10px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;}
+.layer-toggle.active::after{transform:translateX(12px);}
+.layer-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.layer-name{font-size:11px;font-weight:600;color:var(--text);flex:1;}
+.layer-count{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);}
+
+/* ── CLIMA ── */
+.clima-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.clima-card{
+  background:rgba(0,212,255,.04);border:1px solid var(--border);
+  border-radius:7px;padding:8px 6px;text-align:center;
+}
+.clima-icon{font-size:14px;margin-bottom:2px;}
 .clima-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);line-height:1.2;}
-.clima-label{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
-.sensor-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3);flex-shrink:0;}
-.sensor-dot.offline{background:var(--text-muted);}
-.coords-box{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;padding:10px;}
-.coords-row{display:flex;justify-content:space-between;margin-bottom:4px;}
-.coords-label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;}
-.coords-val{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);}
-#map{flex:1;background:var(--bg);}
-.right-panel{width:220px;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
-.mini-chart{padding:16px;border-bottom:1px solid var(--border);}
-.chart-title{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--text-muted);margin-bottom:12px;}
-.bar-chart{display:flex;align-items:flex-end;gap:4px;height:60px;}
-.bar{flex:1;border-radius:2px 2px 0 0;opacity:.7;}
-.bar-label{font-family:'Space Mono',monospace;font-size:8px;color:var(--text-muted);text-align:center;margin-top:4px;}
-.status-grid{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.status-card{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center;}
-.status-icon{font-size:18px;margin-bottom:4px;}
-.status-num{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--accent);}
-.status-desc{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;}
-.notif{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:10px 20px;font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);z-index:9999;transition:transform .3s ease;white-space:nowrap;}
+.clima-label{font-size:7px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;}
+
+/* ── INCIDENTES ── */
+.inc-item{
+  display:flex;align-items:flex-start;gap:8px;padding:7px 8px;
+  border:1px solid var(--border);border-radius:7px;margin-bottom:5px;
+  cursor:pointer;transition:border-color .2s;
+}
+.inc-item:hover{border-color:var(--accent2);background:rgba(255,107,53,.04);}
+.inc-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.inc-titulo{font-size:10px;font-weight:600;color:var(--text);}
+.inc-desc{font-size:9px;color:var(--text-muted);margin-top:2px;line-height:1.4;}
+.inc-empty{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);text-align:center;padding:10px;}
+
+/* ── SENSOR DOT ── */
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);}
+.sdot.on{background:var(--accent3);box-shadow:0 0 6px var(--accent3);animation:ring2 2s infinite;}
+@keyframes ring2{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── PANEL DERECHO FLOTANTE ── */
+.right-panel{
+  position:absolute;right:12px;top:12px;bottom:12px;
+  width:200px;z-index:500;
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+}
+.right-panel>*{pointer-events:all;}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 12px;}
+.stat-card{
+  background:rgba(0,212,255,.04);border:1px solid var(--border);
+  border-radius:8px;padding:10px 6px;text-align:center;
+}
+.stat-card-icon{font-size:16px;margin-bottom:4px;}
+.stat-card-num{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);}
+.stat-card-label{font-size:7px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+
+/* ── MINI BARCHART ── */
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:50px;padding:0 2px;}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.bar{width:100%;border-radius:2px 2px 0 0;min-height:4px;transition:height .4s ease;}
+.bar-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--text-muted);}
+
+/* ── CONTROLES 3D FLOTANTES ── */
+.controls-3d{
+  position:absolute;bottom:20px;right:220px;z-index:600;
+  display:flex;gap:6px;
+}
+.ctrl-btn{
+  font-family:'Space Mono',monospace;font-size:9px;
+  padding:6px 14px;border-radius:6px;
+  border:1px solid var(--border-bright);background:var(--panel);
+  color:var(--text-muted);cursor:pointer;
+  transition:all .2s;backdrop-filter:blur(12px);letter-spacing:.05em;
+}
+.ctrl-btn:hover{border-color:var(--accent);color:var(--accent);}
+.ctrl-btn.on{border-color:var(--accent3);color:var(--accent3);background:rgba(57,211,83,.1);box-shadow:0 0 12px rgba(57,211,83,.2);}
+
+/* ── NOTIF ── */
+.notif{
+  position:fixed;bottom:20px;left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--panel);border:1px solid var(--border-bright);
+  border-radius:6px;padding:8px 18px;
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);
+  z-index:9999;transition:transform .3s;white-space:nowrap;
+  backdrop-filter:blur(12px);box-shadow:var(--glow);
+}
 .notif.show{transform:translateX(-50%) translateY(0);}
-#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s;}
+
+/* ── LOADING ── */
+#loading{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;transition:opacity .6s;
+}
 #loading.hidden{opacity:0;pointer-events:none;}
-.loading-title{font-size:28px;font-weight:800;letter-spacing:.1em;color:#fff;margin-bottom:8px;}
-.loading-sub{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent3);letter-spacing:.15em;margin-bottom:32px;}
-.loading-bar-bg{width:300px;height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
-.loading-bar{height:100%;background:var(--accent3);width:0%;transition:width .4s ease;border-radius:2px;}
-.loading-msg{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:12px;letter-spacing:.1em;}
-.maplibregl-popup-content{background:var(--panel)!important;border:1px solid var(--border)!important;border-radius:8px!important;color:var(--text)!important;font-family:'Syne',sans-serif!important;padding:12px!important;}
-.maplibregl-popup-tip{border-top-color:var(--panel)!important;}
-.popup-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:6px;}
+.loading-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.loading-content{position:relative;text-align:center;}
+.loading-title{font-size:36px;font-weight:800;letter-spacing:.2em;color:#fff;margin-bottom:4px;text-shadow:0 0 30px rgba(0,212,255,.5);}
+.loading-sub{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.2em;margin-bottom:28px;opacity:.7;}
+.loading-bar-bg{width:280px;height:1px;background:var(--border);border-radius:2px;overflow:hidden;margin:0 auto;}
+.loading-bar{height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent));width:0%;transition:width .4s ease;}
+.loading-msg{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:10px;letter-spacing:.1em;}
+
+/* ── POPUP ── */
+.maplibregl-popup-content{
+  background:var(--panel-solid)!important;border:1px solid var(--border-bright)!important;
+  border-radius:8px!important;color:var(--text)!important;
+  font-family:'Syne',sans-serif!important;padding:12px 14px!important;
+  box-shadow:var(--glow)!important;backdrop-filter:blur(16px)!important;
+}
+.maplibregl-popup-close-button{color:var(--text-muted)!important;font-size:16px!important;}
+.maplibregl-popup-tip{border-top-color:var(--panel-solid)!important;}
+.popup-title{font-size:12px;font-weight:700;color:#fff;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .popup-row{display:flex;gap:8px;margin-bottom:3px;}
-.popup-key{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);min-width:70px;}
-.popup-val{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);}
-.maplibregl-ctrl-group{background:var(--panel)!important;border:1px solid var(--border)!important;}
-.maplibregl-ctrl-group button{background:var(--panel)!important;color:var(--text)!important;}
+.popup-key{font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);min-width:64px;}
+.popup-val{font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);}
+.maplibregl-ctrl-group{background:var(--panel)!important;border:1px solid var(--border)!important;border-radius:6px!important;backdrop-filter:blur(12px)!important;}
+.maplibregl-ctrl-group button{background:transparent!important;color:var(--text-muted)!important;}
+.maplibregl-ctrl-group button:hover{background:rgba(0,212,255,.1)!important;color:var(--accent)!important;}
+
+/* ── LEYENDA TRAFICO ── */
+.leyenda{display:flex;gap:10px;padding:6px 0 2px;}
+.ley-item{display:flex;align-items:center;gap:4px;font-size:8px;color:var(--text-muted);}
+.ley-dot{width:7px;height:7px;border-radius:50%;}
 </style>
 </head>
 <body>
 
 <div id="loading">
-  <div class="loading-title">TURBACO</div>
-  <div class="loading-sub">SMART CITY · GEMELO DIGITAL 3D v0.3</div>
-  <div class="loading-bar-bg"><div class="loading-bar" id="lbar"></div></div>
-  <div class="loading-msg" id="lmsg">Iniciando motor 3D...</div>
+  <div class="loading-grid"></div>
+  <div class="loading-content">
+    <div class="loading-title">TURBACO</div>
+    <div class="loading-sub">GEMELO DIGITAL · 3D ENGINE</div>
+    <div class="loading-bar-bg"><div class="loading-bar" id="lbar"></div></div>
+    <div class="loading-msg" id="lmsg">Inicializando motor WebGL...</div>
+  </div>
 </div>
 
 <header>
   <div class="logo">
-    <div class="logo-dot"></div>
+    <div class="logo-pulse"></div>
     <div>
-      <div class="logo-text">Gemelo Digital 3D</div>
-      <div class="logo-sub">Turbaco · Bolívar · Colombia</div>
+      <div class="logo-text">Smart Turbaco</div>
+      <div class="logo-sub">Bolívar · Colombia · Digital Twin</div>
     </div>
   </div>
   <div class="header-center">
-    <a href="index.html" class="view-btn">← Vista Leaflet</a>
-    <a href="index-gl.html" class="view-btn active">Vista 3D ●</a>
+    <a href="index.html" class="view-btn">2D Leaflet</a>
+    <a href="index-gl.html" class="view-btn active">3D WebGL ●</a>
   </div>
   <div class="header-stats">
     <div class="stat"><div class="stat-val" id="stat-lat">10.3281°N</div><div class="stat-label">Latitud</div></div>
     <div class="stat"><div class="stat-val" id="stat-lon">75.3664°W</div><div class="stat-label">Longitud</div></div>
-    <div class="stat"><div class="stat-val" id="stat-zoom">13</div><div class="stat-label">Zoom</div></div>
+    <div class="stat"><div class="stat-val" id="stat-zoom">16</div><div class="stat-label">Zoom</div></div>
     <div class="stat"><div class="stat-val" id="stat-incidentes">0</div><div class="stat-label">Incidentes</div></div>
     <div class="stat"><div class="stat-val" id="reloj">--:--:--</div><div class="stat-label">Hora local</div></div>
   </div>
 </header>
 
 <div class="main">
-  <div class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-title">Capas del mapa</div>
-      <div class="layer-item">
-        <button class="layer-toggle active" id="tog-vias" onclick="toggleLayer('vias')"></button>
-        <div class="layer-color" style="background:#e07b39"></div>
-        <div class="layer-info"><div class="layer-name">Vías</div><div class="layer-count" id="cnt-vias">Cargando...</div></div>
-      </div>
-      <div class="layer-item">
-        <button class="layer-toggle active" id="tog-vp" onclick="toggleLayer('vias_principales')"></button>
-        <div class="layer-color" style="background:#ff6b35"></div>
-        <div class="layer-info"><div class="layer-name">Vías principales</div><div class="layer-count" id="cnt-vp">Cargando...</div></div>
-      </div>
-      <div class="layer-item">
-        <button class="layer-toggle" id="tog-edif" onclick="toggleLayer('edificios')"></button>
-        <div class="layer-color" style="background:#4a9eff"></div>
-        <div class="layer-info"><div class="layer-name">Edificios 3D</div><div class="layer-count" id="cnt-edif">Click para cargar</div></div>
-      </div>
-      <div class="layer-item">
-        <button class="layer-toggle" id="tog-uso" onclick="toggleLayer('uso_suelo')"></button>
-        <div class="layer-color" style="background:#39d353"></div>
-        <div class="layer-info"><div class="layer-name">Uso de suelo</div><div class="layer-count" id="cnt-uso">Click para cargar</div></div>
-      </div>
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-title">
-        <span>Tráfico en tiempo real</span>
-        <span id="trafico-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);display:inline-block"></span>
-      </div>
-      <div class="layer-item">
-        <button class="layer-toggle active" id="tog-flujo" onclick="toggleTrafico('flujo')"></button>
-        <div class="layer-color" style="background:linear-gradient(to right,#39d353,#ffa500,#e74c3c)"></div>
-        <div class="layer-info"><div class="layer-name">Flujo de tráfico</div><div class="layer-count">Verde / Amarillo / Rojo</div></div>
-      </div>
-      <div class="layer-item">
-        <button class="layer-toggle active" id="tog-incid" onclick="toggleTrafico('incidentes')"></button>
-        <div class="layer-color" style="background:#ff6b35"></div>
-        <div class="layer-info"><div class="layer-name">Incidentes</div><div class="layer-count" id="cnt-incidentes">Cargando...</div></div>
-      </div>
-      <div class="leyenda-trafico">
-        <div class="ley-item"><div class="ley-dot" style="background:#39d353"></div>Fluido</div>
-        <div class="ley-item"><div class="ley-dot" style="background:#ffa500"></div>Lento</div>
-        <div class="ley-item"><div class="ley-dot" style="background:#e74c3c"></div>Congestionado</div>
-      </div>
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:10px;text-align:right">Actualiza cada 2 min · TomTom API</div>
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-title">Incidentes activos</div>
-      <div id="lista-incidentes"><div class="incidente-empty">Cargando...</div></div>
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-title">
-        <span>Estación climática</span>
-        <span class="sensor-dot offline" id="clima-dot"></span>
-      </div>
-      <div class="clima-grid">
-        <div class="clima-card"><div class="clima-icon">🌡️</div><div class="clima-val" id="cl-temp">—</div><div class="clima-label">Temperatura</div></div>
-        <div class="clima-card"><div class="clima-icon">💧</div><div class="clima-val" id="cl-hum">—</div><div class="clima-label">Humedad</div></div>
-        <div class="clima-card"><div class="clima-icon">💨</div><div class="clima-val" id="cl-viento">—</div><div class="clima-label">Viento</div></div>
-        <div class="clima-card"><div class="clima-icon">🌧️</div><div class="clima-val" id="cl-lluvia">—</div><div class="clima-label">Lluvia</div></div>
-        <div class="clima-card"><div class="clima-icon">🔽</div><div class="clima-val" id="cl-presion">—</div><div class="clima-label">Presión</div></div>
-        <div class="clima-card"><div class="clima-icon">☁️</div><div class="clima-val" id="cl-nube">—</div><div class="clima-label">Nubosidad</div></div>
-      </div>
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:8px;text-align:right">Actualiza cada 5 min · Open-Meteo</div>
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-title">Posición del cursor</div>
-      <div class="coords-box">
-        <div class="coords-row"><span class="coords-label">Lat</span><span class="coords-val" id="cur-lat">—</span></div>
-        <div class="coords-row"><span class="coords-label">Lon</span><span class="coords-val" id="cur-lon">—</span></div>
-      </div>
-    </div>
-  </div>
-
   <div id="map"></div>
 
-  <div class="right-panel">
-    <div class="mini-chart">
-      <div class="chart-title">Cobertura de capas</div>
-      <div class="bar-chart">
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="bar" id="bar-vias" style="height:40px;background:#e07b39"></div><div class="bar-label">Vías</div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="bar" id="bar-vp" style="height:20px;background:#ff6b35"></div><div class="bar-label">V.P</div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="bar" id="bar-edif" style="height:10px;background:#4a9eff"></div><div class="bar-label">Edif</div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="bar" id="bar-uso" style="height:10px;background:#39d353"></div><div class="bar-label">Suelo</div></div>
+  <!-- SIDEBAR IZQUIERDA -->
+  <div class="sidebar">
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>Capas</span>
+      </div>
+      <div class="panel-body" style="display:flex;flex-direction:column;gap:2px;">
+        <div class="layer-row">
+          <button class="layer-toggle active" id="tog-vias" onclick="toggleLayer('vias')"></button>
+          <div class="layer-dot" style="background:#e07b39"></div>
+          <span class="layer-name">Vías</span>
+          <span class="layer-count" id="cnt-vias">—</span>
+        </div>
+        <div class="layer-row">
+          <button class="layer-toggle active" id="tog-vp" onclick="toggleLayer('vias_principales')"></button>
+          <div class="layer-dot" style="background:#ff6b35"></div>
+          <span class="layer-name">Vías principales</span>
+          <span class="layer-count" id="cnt-vp">—</span>
+        </div>
+        <div class="layer-row">
+          <button class="layer-toggle active" id="tog-edif" onclick="toggleLayer('edificios')"></button>
+          <div class="layer-dot" style="background:#00d4ff"></div>
+          <span class="layer-name">Edificios 3D</span>
+          <span class="layer-count" id="cnt-edif">—</span>
+        </div>
+        <div class="layer-row">
+          <button class="layer-toggle" id="tog-uso" onclick="toggleLayer('uso_suelo')"></button>
+          <div class="layer-dot" style="background:#39d353"></div>
+          <span class="layer-name">Uso de suelo</span>
+          <span class="layer-count" id="cnt-uso">Click p/ cargar</span>
+        </div>
       </div>
     </div>
-    <div class="status-grid">
-      <div class="status-card"><div class="status-icon">🛣️</div><div class="status-num" id="num-vias">—</div><div class="status-desc">Vías</div></div>
-      <div class="status-card"><div class="status-icon">🏠</div><div class="status-num" id="num-edif">—</div><div class="status-desc">Edificios</div></div>
-      <div class="status-card"><div class="status-icon">⚠️</div><div class="status-num" id="num-incidentes">0</div><div class="status-desc">Incidentes</div></div>
-      <div class="status-card"><div class="status-icon">📡</div><div class="status-num">1</div><div class="status-desc">Sensores</div></div>
-    </div>
-    <div class="sidebar-section" style="margin-top:auto">
-      <div class="sidebar-title">Sistema</div>
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.8">
-        <div>Motor: <span style="color:var(--accent3)">MapLibre GL v4</span></div>
-        <div>3D: <span style="color:var(--accent3)">Activo</span></div>
-        <div>Tráfico: <span style="color:var(--accent)">TomTom API</span></div>
-        <div>Clima: <span style="color:var(--accent)">Open-Meteo</span></div>
-        <div>Versión: <span style="color:var(--accent)">0.3.0-gl</span></div>
-        <div>Estado: <span style="color:var(--accent3)">● Activo</span></div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>Tráfico en tiempo real</span>
+        <span id="trafico-dot" class="sdot"></span>
+      </div>
+      <div class="panel-body">
+        <div class="layer-row">
+          <button class="layer-toggle active" id="tog-flujo" onclick="toggleTrafico('flujo')"></button>
+          <div class="layer-dot" style="background:linear-gradient(to right,#39d353,#ffa500,#e74c3c)"></div>
+          <span class="layer-name">Flujo</span>
+        </div>
+        <div class="layer-row">
+          <button class="layer-toggle active" id="tog-incid" onclick="toggleTrafico('incidentes')"></button>
+          <div class="layer-dot" style="background:#ff6b35"></div>
+          <span class="layer-name">Incidentes</span>
+          <span class="layer-count" id="cnt-incidentes">—</span>
+        </div>
+        <div class="leyenda">
+          <div class="ley-item"><div class="ley-dot" style="background:#39d353"></div>Fluido</div>
+          <div class="ley-item"><div class="ley-dot" style="background:#ffa500"></div>Lento</div>
+          <div class="ley-item"><div class="ley-dot" style="background:#e74c3c"></div>Congestionado</div>
+        </div>
       </div>
     </div>
+
+    <div class="panel">
+      <div class="panel-header">Incidentes activos</div>
+      <div class="panel-body" style="padding:8px;">
+        <div id="lista-incidentes"><div class="inc-empty">Cargando...</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>Estación climática</span>
+        <span class="sdot" id="clima-dot"></span>
+      </div>
+      <div class="panel-body">
+        <div class="clima-grid">
+          <div class="clima-card"><div class="clima-icon">🌡️</div><div class="clima-val" id="cl-temp">—</div><div class="clima-label">Temp</div></div>
+          <div class="clima-card"><div class="clima-icon">💧</div><div class="clima-val" id="cl-hum">—</div><div class="clima-label">Humedad</div></div>
+          <div class="clima-card"><div class="clima-icon">💨</div><div class="clima-val" id="cl-viento">—</div><div class="clima-label">Viento</div></div>
+          <div class="clima-card"><div class="clima-icon">🌧️</div><div class="clima-val" id="cl-lluvia">—</div><div class="clima-label">Lluvia</div></div>
+          <div class="clima-card"><div class="clima-icon">🔽</div><div class="clima-val" id="cl-presion">—</div><div class="clima-label">Presión</div></div>
+          <div class="clima-card"><div class="clima-icon">☁️</div><div class="clima-val" id="cl-nube">—</div><div class="clima-label">Nubosidad</div></div>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--text-muted);margin-top:8px;text-align:right">Open-Meteo · cada 5 min</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">Posición del cursor</div>
+      <div class="panel-body">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;">Lat</span>
+          <span class="stat-val" id="cur-lat" style="font-size:10px;">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;">Lon</span>
+          <span class="stat-val" id="cur-lon" style="font-size:10px;">—</span>
+        </div>
+      </div>
+    </div>
+
   </div>
+
+  <!-- PANEL DERECHO -->
+  <div class="right-panel">
+
+    <div class="panel">
+      <div class="panel-header">Estadísticas</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-icon">🛣️</div><div class="stat-card-num" id="num-vias">—</div><div class="stat-card-label">Vías</div></div>
+        <div class="stat-card"><div class="stat-card-icon">🏠</div><div class="stat-card-num" id="num-edif">—</div><div class="stat-card-label">Edificios</div></div>
+        <div class="stat-card"><div class="stat-card-icon">⚠️</div><div class="stat-card-num" id="num-incidentes">0</div><div class="stat-card-label">Incidentes</div></div>
+        <div class="stat-card"><div class="stat-card-icon">📡</div><div class="stat-card-num">1</div><div class="stat-card-label">Sensores</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">Cobertura de capas</div>
+      <div class="panel-body">
+        <div class="bar-chart">
+          <div class="bar-wrap"><div class="bar" id="bar-vias" style="height:10px;background:#e07b39"></div><div class="bar-lbl">Vías</div></div>
+          <div class="bar-wrap"><div class="bar" id="bar-vp" style="height:10px;background:#ff6b35"></div><div class="bar-lbl">V.P.</div></div>
+          <div class="bar-wrap"><div class="bar" id="bar-edif" style="height:10px;background:#00d4ff"></div><div class="bar-lbl">Edif</div></div>
+          <div class="bar-wrap"><div class="bar" id="bar-uso" style="height:10px;background:#39d353"></div><div class="bar-lbl">Suelo</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:auto;">
+      <div class="panel-header">Sistema</div>
+      <div class="panel-body">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-muted);line-height:2">
+          <div>Motor <span style="color:var(--accent3)">MapLibre GL v4</span></div>
+          <div>Render <span style="color:var(--accent3)">WebGL 3D</span></div>
+          <div>Tráfico <span style="color:var(--accent)">TomTom API</span></div>
+          <div>Clima <span style="color:var(--accent)">Open-Meteo</span></div>
+          <div>Versión <span style="color:var(--accent)">0.3.0-gl</span></div>
+          <div>Estado <span style="color:var(--accent3)">● Online</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CONTROLES 3D -->
+  <div class="controls-3d">
+    <button class="ctrl-btn on" id="btn-3d" onclick="toggle3D()">3D ●</button>
+    <button class="ctrl-btn" id="btn-rotate" onclick="toggleRotate()">Rotar</button>
+    <button class="ctrl-btn" onclick="map.easeTo({center:[LON,LAT],zoom:16,pitch:55,bearing:-15,duration:1000})">Reset</button>
+  </div>
+
 </div>
 
 <div class="notif" id="notif"></div>
@@ -235,229 +398,312 @@ const TOMTOM_KEY = '6I2QphRaUEuYlrUGpXJshaOyvGpMzFwp';
 const LAT = 10.3281, LON = -75.3664;
 const BBOX = '-75.44,10.28,-75.27,10.40';
 
-// ── RELOJ ──────────────────────────────────────────────
 const tickReloj = () => document.getElementById('reloj').textContent =
   new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 tickReloj(); setInterval(tickReloj, 1000);
 
-function advanceLoad(p,m){ document.getElementById('lbar').style.width=p+'%'; document.getElementById('lmsg').textContent=m; }
-function showNotif(msg){ const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),2800); }
-advanceLoad(5,'Iniciando motor 3D...');
+function load(p,m){ document.getElementById('lbar').style.width=p+'%'; document.getElementById('lmsg').textContent=m; }
+function notif(msg){ const n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),2800); }
+load(5,'Inicializando motor WebGL...');
 
-// ── ESTILO BASE (CartoDB dark, sin API key) ───────────
-const BASE_STYLE = {
-  version: 8,
-  sources: {
-    carto: { type:'raster', tiles:['https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png'], tileSize:256, attribution:'© CartoDB © OSM' },
-    labels: { type:'raster', tiles:['https://a.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png'], tileSize:256 },
-    traffic: { type:'raster', tiles:[`https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${TOMTOM_KEY}`], tileSize:256 }
+// ── ESTILO BASE ────────────────────────────────────────
+const STYLE = {
+  version:8,
+  sources:{
+    carto:{ type:'raster', tiles:['https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png'], tileSize:256, attribution:'© CartoDB © OSM' },
+    traffic:{ type:'raster', tiles:[`https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${TOMTOM_KEY}`], tileSize:256 },
+    labels:{ type:'raster', tiles:['https://a.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png'], tileSize:256 }
   },
-  layers: [
-    { id:'carto-bg', type:'raster', source:'carto' },
-    { id:'traffic-flow', type:'raster', source:'traffic', paint:{'raster-opacity':0.8} },
-    { id:'carto-labels', type:'raster', source:'labels' }
+  layers:[
+    { id:'bg', type:'raster', source:'carto' },
+    { id:'traffic-flow', type:'raster', source:'traffic', paint:{'raster-opacity':0.75} },
+    { id:'labels', type:'raster', source:'labels' }
   ]
 };
 
 // ── MAPA ──────────────────────────────────────────────
 const map = new maplibregl.Map({
-  container:'map', style:BASE_STYLE,
-  center:[LON, LAT], zoom:15, pitch:45, bearing:-10,
-  attributionControl:{ compact:true }
+  container:'map', style:STYLE,
+  center:[LON, LAT], zoom:16, pitch:55, bearing:-15,
+  attributionControl:{compact:true}
 });
 map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
-map.addControl(new maplibregl.ScaleControl({ unit:'metric' }), 'bottom-left');
+map.addControl(new maplibregl.ScaleControl({unit:'metric'}), 'bottom-left');
 
-// Toggle inclinación 3D — arranca activo
-let pitch3d = true;
-const btn3d = document.createElement('button');
-btn3d.className = 'view-btn'; btn3d.style.cssText='position:fixed;bottom:60px;right:250px;z-index:500;font-size:10px;padding:6px 12px;border-radius:6px;border:1px solid var(--accent3);background:var(--panel);color:var(--accent3);cursor:pointer;font-family:Space Mono,monospace;';
-btn3d.textContent = '3D ON';
-btn3d.onclick = () => { pitch3d=!pitch3d; map.easeTo({pitch:pitch3d?45:0, duration:600}); btn3d.textContent=pitch3d?'3D ON':'3D OFF'; btn3d.style.color=pitch3d?'var(--accent3)':'var(--text-muted)'; btn3d.style.borderColor=pitch3d?'var(--accent3)':'var(--border)'; };
-document.body.appendChild(btn3d);
+// ── CONTROLES 3D ──────────────────────────────────────
+let is3D = true, isRotating = false, rotateAnim;
 
-map.on('mousemove', e => { document.getElementById('cur-lat').textContent=e.lngLat.lat.toFixed(6); document.getElementById('cur-lon').textContent=e.lngLat.lng.toFixed(6); });
-map.on('move', () => { const c=map.getCenter(), z=map.getZoom(); document.getElementById('stat-lat').textContent=c.lat.toFixed(4)+'°N'; document.getElementById('stat-lon').textContent=Math.abs(c.lng).toFixed(4)+'°W'; document.getElementById('stat-zoom').textContent=z.toFixed(1); });
+function toggle3D(){
+  is3D = !is3D;
+  const btn = document.getElementById('btn-3d');
+  map.easeTo({pitch: is3D ? 55 : 0, duration:700});
+  btn.classList.toggle('on', is3D);
+  btn.textContent = is3D ? '3D ●' : '3D ○';
+  notif(is3D ? 'Vista 3D activada' : 'Vista 2D activada');
+}
+
+function toggleRotate(){
+  isRotating = !isRotating;
+  const btn = document.getElementById('btn-rotate');
+  btn.classList.toggle('on', isRotating);
+  btn.textContent = isRotating ? 'Rotando ●' : 'Rotar';
+  if(isRotating){ spin(); } else { cancelAnimationFrame(rotateAnim); }
+}
+
+function spin(){
+  if(!isRotating) return;
+  map.setBearing((map.getBearing() + 0.15) % 360);
+  rotateAnim = requestAnimationFrame(spin);
+}
+
+map.on('mousemove', e => {
+  document.getElementById('cur-lat').textContent = e.lngLat.lat.toFixed(6);
+  document.getElementById('cur-lon').textContent = e.lngLat.lng.toFixed(6);
+});
+map.on('move', () => {
+  const c = map.getCenter(), z = map.getZoom();
+  document.getElementById('stat-lat').textContent = c.lat.toFixed(4)+'°N';
+  document.getElementById('stat-lon').textContent = Math.abs(c.lng).toFixed(4)+'°W';
+  document.getElementById('stat-zoom').textContent = z.toFixed(1);
+});
 
 // ── CAPAS GEOJSON ─────────────────────────────────────
-const layerLoaded = {vias:false, vias_principales:false, edificios:false, uso_suelo:false};
-const layerVisible = {vias:true, vias_principales:true, edificios:false, uso_suelo:false};
+const layerLoaded  = {vias:false, vias_principales:false, edificios:false, uso_suelo:false};
+const layerVisible = {vias:true,  vias_principales:true,  edificios:true,  uso_suelo:false};
 
-const BUILDING_HEIGHT = {apartments:12, commercial:8, house:5, hut:3, kiosk:3, roof:4, yes:6};
-
-function buildPopupHTML(p){
+function buildPopup(p){
   if(!p) return '<div class="popup-title">Sin datos</div>';
-  const skip=['osm_id','osm_way_id'];
-  let rows='';
+  const skip = new Set(['osm_id','osm_way_id']);
+  let rows = '';
   for(const [k,v] of Object.entries(p)){
-    if(skip.includes(k)||!v||v==='null') continue;
-    rows+=`<div class="popup-row"><span class="popup-key">${k}</span><span class="popup-val">${v}</span></div>`;
+    if(skip.has(k) || v == null || v === '' || v === 'null') continue;
+    rows += `<div class="popup-row"><span class="popup-key">${k}</span><span class="popup-val">${v}</span></div>`;
   }
-  return `<div class="popup-title">${p.name||p.highway||p.building||p.landuse||'Elemento'}</div>${rows||'<div style="font-size:10px;color:#586069">Sin atributos</div>'}`;
+  return `<div class="popup-title">${p.name||p.highway||p.building||p.landuse||'Elemento'}</div>${rows||'<div style="font-size:9px;color:#586069">Sin atributos adicionales</div>'}`;
 }
 
-function addClickPopup(layerId){
+function onClickLayer(layerId){
   map.on('click', layerId, e => {
-    const p = e.features[0]?.properties || {};
-    new maplibregl.Popup().setLngLat(e.lngLat).setHTML(buildPopupHTML(p)).addTo(map);
+    new maplibregl.Popup({offset:8})
+      .setLngLat(e.lngLat)
+      .setHTML(buildPopup(e.features[0]?.properties))
+      .addTo(map);
   });
-  map.on('mouseenter', layerId, () => map.getCanvas().style.cursor='pointer');
-  map.on('mouseleave', layerId, () => map.getCanvas().style.cursor='');
+  map.on('mouseenter', layerId, () => map.getCanvas().style.cursor = 'pointer');
+  map.on('mouseleave', layerId, () => map.getCanvas().style.cursor = '');
 }
 
-const LANDUSE_COLOR = ['match',['get','landuse'],'residential','#4a9eff','commercial','#ff6b35','industrial','#ffa500','forest','#1a7a2e','park','#39d353','grass','#5dde6a','farmland','#c8b44a','water','#0077be','#39d353'];
+const LANDUSE_COLOR = ['match',['get','landuse'],
+  'residential','#2a4a7f','commercial','#7a3a1a','industrial','#6a4a0a',
+  'forest','#1a4a2a','park','#1a5a2a','grass','#2a5a2a','farmland','#5a4a1a','water','#0a3a5a','#2a3a2a'];
 
 async function loadLayer(name){
-  if(layerLoaded[name]) {
+  const ids = {vias:'cnt-vias',vias_principales:'cnt-vp',edificios:'cnt-edif',uso_suelo:'cnt-uso'};
+  const bars = {vias:'bar-vias',vias_principales:'bar-vp',edificios:'bar-edif',uso_suelo:'bar-uso'};
+
+  if(layerLoaded[name]){
     const vis = layerVisible[name] ? 'visible' : 'none';
-    if(name==='edificios'){ map.setLayoutProperty('edificios-fill','visibility',vis); map.setLayoutProperty('edificios-3d','visibility',vis); }
-    else map.setLayoutProperty(name,'visibility',vis);
+    const lids = name==='edificios' ? ['edif-base','edif-3d','edif-outline'] : [name];
+    lids.forEach(id => { if(map.getLayer(id)) map.setLayoutProperty(id,'visibility',vis); });
     return;
   }
-  const cntMap = {vias:'cnt-vias',vias_principales:'cnt-vp',edificios:'cnt-edif',uso_suelo:'cnt-uso'};
-  const barMap = {vias:'bar-vias',vias_principales:'bar-vp',edificios:'bar-edif',uso_suelo:'bar-uso'};
-  document.getElementById(cntMap[name]).textContent='Cargando...';
-  try {
-    const res = await fetch(name+'.geojson');
-    const data = await res.json();
-    const count = data.features?.length || 0;
-    map.addSource(name, { type:'geojson', data });
-    document.getElementById(cntMap[name]).textContent = count.toLocaleString('es-CO')+' elementos';
-    document.getElementById(barMap[name]).style.height = Math.min(55,Math.max(8,count/30))+'px';
 
-    if(name==='vias'){
-      map.addLayer({ id:'vias', type:'line', source:'vias', layout:{visibility:'visible'}, paint:{'line-color':'#e07b39','line-width':['match',['get','highway'],'primary',3,'trunk',3,'secondary',2,1],'line-opacity':0.8} });
-      addClickPopup('vias');
-      document.getElementById('num-vias').textContent = count>999?(count/1000).toFixed(1)+'k':count;
-    } else if(name==='vias_principales'){
-      map.addLayer({ id:'vias_principales', type:'line', source:'vias_principales', layout:{visibility:'visible'}, paint:{'line-color':'#ff6b35','line-width':2.5,'line-opacity':0.9} });
-      addClickPopup('vias_principales');
-    } else if(name==='edificios'){
-      map.addLayer({ id:'edificios-fill', type:'fill', source:'edificios', layout:{visibility:'visible'}, paint:{'fill-color':'#4a9eff','fill-opacity':0.2} });
-      map.addLayer({ id:'edificios-3d', type:'fill-extrusion', source:'edificios', layout:{visibility:'visible'},
-        paint:{ 'fill-extrusion-color':'#4a9eff', 'fill-extrusion-opacity':0.7,
-          'fill-extrusion-height':['match',['get','building'],'apartments',12,'commercial',8,'house',5,'hut',3,'kiosk',3,'roof',4,6],
-          'fill-extrusion-base':0 }
+  document.getElementById(ids[name]).textContent = 'Cargando...';
+  try{
+    const data = await (await fetch(name+'.geojson')).json();
+    const count = data.features?.length || 0;
+    map.addSource(name, {type:'geojson', data});
+
+    if(name === 'vias'){
+      map.addLayer({id:'vias', type:'line', source:'vias',
+        layout:{visibility:'visible'},
+        paint:{'line-color':['match',['get','highway'],'primary','#ff8c42','trunk','#ff8c42','secondary','#e07b39','#c86530'],
+               'line-width':['match',['get','highway'],'primary',3,'trunk',3,'secondary',2,1.2],
+               'line-opacity':0.85}
       });
-      addClickPopup('edificios-3d');
+      onClickLayer('vias');
+      document.getElementById('num-vias').textContent = count>999?(count/1000).toFixed(1)+'k':count;
+      document.getElementById(bars[name]).style.height = Math.min(46,Math.max(6,count/30))+'px';
+
+    } else if(name === 'vias_principales'){
+      map.addLayer({id:'vias_principales', type:'line', source:'vias_principales',
+        layout:{visibility:'visible'},
+        paint:{'line-color':'#ff6b35','line-width':3,'line-opacity':0.9,
+               'line-blur':0.5}
+      });
+      document.getElementById(bars[name]).style.height = Math.min(46,Math.max(6,count/5))+'px';
+
+    } else if(name === 'edificios'){
+      // Base fill (visible en zoom bajo)
+      map.addLayer({id:'edif-base', type:'fill', source:'edificios',
+        layout:{visibility:'visible'},
+        paint:{'fill-color':'rgba(0,180,220,0.15)','fill-outline-color':'rgba(0,212,255,0.5)'}
+      });
+      // 3D extrusion — alturas realistas para Colombia tropical
+      map.addLayer({id:'edif-3d', type:'fill-extrusion', source:'edificios',
+        layout:{visibility:'visible'},
+        paint:{
+          'fill-extrusion-color':['match',['get','building'],
+            'apartments','#0ea5c8','commercial','#2a7abf','house','#0a8a9a',
+            'hut','#0a6a7a','kiosk','#0a5a6a','roof','#1a9ab8','#0a90b0'],
+          'fill-extrusion-height':['match',['get','building'],
+            'apartments',24,'commercial',16,'house',8,'hut',5,'kiosk',4,'roof',6,10],
+          'fill-extrusion-base':0,
+          'fill-extrusion-opacity':0.85,
+          'fill-extrusion-vertical-gradient':true
+        }
+      });
+      // Outline top
+      map.addLayer({id:'edif-outline', type:'line', source:'edificios',
+        layout:{visibility:'visible'},
+        paint:{'line-color':'rgba(0,212,255,0.6)','line-width':0.8,'line-opacity':0.7}
+      });
+      onClickLayer('edif-3d');
       document.getElementById('num-edif').textContent = count>999?(count/1000).toFixed(1)+'k':count;
-    } else if(name==='uso_suelo'){
-      map.addLayer({ id:'uso_suelo', type:'fill', source:'uso_suelo', layout:{visibility:'visible'}, paint:{'fill-color':LANDUSE_COLOR,'fill-opacity':0.3,'fill-outline-color':'rgba(255,255,255,0.1)'} });
-      addClickPopup('uso_suelo');
+      document.getElementById(bars[name]).style.height = Math.min(46,Math.max(6,count/10))+'px';
+
+    } else if(name === 'uso_suelo'){
+      map.addLayer({id:'uso_suelo', type:'fill', source:'uso_suelo',
+        layout:{visibility:'visible'},
+        paint:{'fill-color':LANDUSE_COLOR,'fill-opacity':0.4,'fill-outline-color':'rgba(255,255,255,0.05)'}
+      });
+      onClickLayer('uso_suelo');
+      document.getElementById(bars[name]).style.height = Math.min(46,Math.max(6,count*2))+'px';
     }
-    layerLoaded[name]=true;
-  } catch(e){ document.getElementById(cntMap[name]).textContent='Error al cargar'; }
+
+    layerLoaded[name] = true;
+    document.getElementById(ids[name]).textContent = count.toLocaleString('es-CO')+' elem.';
+  } catch(e){
+    document.getElementById(ids[name]).textContent = 'Error';
+    console.error('Error cargando '+name, e);
+  }
 }
 
 async function toggleLayer(name){
-  layerVisible[name]=!layerVisible[name];
-  document.getElementById({vias:'tog-vias',vias_principales:'tog-vp',edificios:'tog-edif',uso_suelo:'tog-uso'}[name]).classList.toggle('active',layerVisible[name]);
+  layerVisible[name] = !layerVisible[name];
+  const togId = {vias:'tog-vias',vias_principales:'tog-vp',edificios:'tog-edif',uso_suelo:'tog-uso'}[name];
+  document.getElementById(togId).classList.toggle('active', layerVisible[name]);
   if(!layerLoaded[name] && layerVisible[name]){ await loadLayer(name); }
   else if(layerLoaded[name]){
-    const vis = layerVisible[name]?'visible':'none';
-    if(name==='edificios'){ map.setLayoutProperty('edificios-fill','visibility',vis); map.setLayoutProperty('edificios-3d','visibility',vis); }
-    else map.setLayoutProperty(name,'visibility',vis);
+    const vis = layerVisible[name] ? 'visible' : 'none';
+    const lids = name==='edificios' ? ['edif-base','edif-3d','edif-outline'] : [name];
+    lids.forEach(id => { if(map.getLayer(id)) map.setLayoutProperty(id,'visibility',vis); });
   }
-  showNotif((layerVisible[name]?'Activa: ':'Oculta: ')+name.replace('_',' '));
+  notif((layerVisible[name]?'Activa: ':'Oculta: ')+name.replace('_',' '));
 }
 
 // ── TRÁFICO ───────────────────────────────────────────
-let traficoVis={flujo:true, incidentes:true};
-let incData=[], incMarkers=[];
+let traficoVis = {flujo:true, incidentes:true};
+let incData = [], incMarkers = [];
+const icoInc = {ACCIDENT:'🚗',JAM:'🚦',ROAD_WORK:'🚧',ROAD_CLOSURE:'🚫',HAZARD:'⚠️',WEATHER:'🌧️'};
+const colInc = {ACCIDENT:'#e74c3c',JAM:'#f39c12',ROAD_WORK:'#3498db',ROAD_CLOSURE:'#8e44ad',HAZARD:'#ff6b35',WEATHER:'#00d4ff'};
 
 function toggleTrafico(tipo){
-  traficoVis[tipo]=!traficoVis[tipo];
-  document.getElementById(tipo==='flujo'?'tog-flujo':'tog-incid').classList.toggle('active',traficoVis[tipo]);
-  if(tipo==='flujo'){ map.setLayoutProperty('traffic-flow','visibility',traficoVis.flujo?'visible':'none'); }
-  else { incMarkers.forEach(m=>{ const el=m.getElement(); el.style.display=traficoVis.incidentes?'flex':'none'; }); }
-  showNotif((traficoVis[tipo]?'Activo: ':'Oculto: ')+tipo);
+  traficoVis[tipo] = !traficoVis[tipo];
+  document.getElementById(tipo==='flujo'?'tog-flujo':'tog-incid').classList.toggle('active', traficoVis[tipo]);
+  if(tipo==='flujo'){
+    if(map.getLayer('traffic-flow')) map.setLayoutProperty('traffic-flow','visibility', traficoVis.flujo?'visible':'none');
+  } else {
+    incMarkers.forEach(m => m.getElement().style.display = traficoVis.incidentes ? 'flex' : 'none');
+  }
+  notif((traficoVis[tipo]?'Activo: ':'Oculto: ')+tipo);
 }
 
-const icoInc={ACCIDENT:'🚗',JAM:'🚦',ROAD_WORK:'🚧',ROAD_CLOSURE:'🚫',HAZARD:'⚠️',WEATHER:'🌧️'};
-const colInc={ACCIDENT:'#e74c3c',JAM:'#f39c12',ROAD_WORK:'#3498db',ROAD_CLOSURE:'#8e44ad',HAZARD:'#ff6b35',WEATHER:'#00d4ff'};
-
 async function fetchIncidentes(){
-  try {
-    const url=`https://api.tomtom.com/traffic/services/5/incidentDetails?key=${TOMTOM_KEY}&bbox=${BBOX}&fields={incidents{type,geometry{type,coordinates},properties{iconCategory,magnitudeOfDelay,from,to,delay,description}}}&language=es-ES&timeValidityFilter=present`;
+  try{
+    const url = `https://api.tomtom.com/traffic/services/5/incidentDetails?key=${TOMTOM_KEY}&bbox=${BBOX}&fields={incidents{type,geometry{type,coordinates},properties{iconCategory,magnitudeOfDelay,from,to,delay,description}}}&language=es-ES&timeValidityFilter=present`;
     const d = await (await fetch(url)).json();
     incData = d.incidents||[];
-    incMarkers.forEach(m=>m.remove()); incMarkers=[];
-    incData.forEach(inc=>{
-      const p=inc.properties||{}, tipo=p.iconCategory||'HAZARD';
-      const coords=inc.geometry?.coordinates; if(!coords) return;
-      let lat,lon;
+    incMarkers.forEach(m=>m.remove()); incMarkers = [];
+    incData.forEach(inc => {
+      const p = inc.properties||{}, tipo = p.iconCategory||'HAZARD';
+      const coords = inc.geometry?.coordinates; if(!coords) return;
+      let lat, lon;
       if(inc.geometry.type==='Point'){[lon,lat]=coords;}
       else if(inc.geometry.type==='LineString'){[lon,lat]=coords[0];}
       else return;
-      const el=document.createElement('div');
-      el.style.cssText=`width:28px;height:28px;background:${colInc[tipo]||'#ff6b35'};border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.4);cursor:pointer;`;
-      el.textContent=icoInc[tipo]||'⚠️';
+      const el = document.createElement('div');
+      el.style.cssText = `width:28px;height:28px;background:${colInc[tipo]||'#ff6b35'};border:2px solid rgba(255,255,255,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 12px ${colInc[tipo]||'#ff6b35'}88;cursor:pointer;`;
+      el.textContent = icoInc[tipo]||'⚠️';
+      if(!traficoVis.incidentes) el.style.display = 'none';
       const mk = new maplibregl.Marker({element:el}).setLngLat([lon,lat])
-        .setPopup(new maplibregl.Popup().setHTML(`<div class="popup-title">${icoInc[tipo]||'⚠️'} ${p.description||tipo}</div><div class="popup-row"><span class="popup-key">Desde</span><span class="popup-val">${p.from||'—'}</span></div><div class="popup-row"><span class="popup-key">Hasta</span><span class="popup-val">${p.to||'—'}</span></div><div class="popup-row"><span class="popup-key">Demora</span><span class="popup-val">${p.delay?Math.round(p.delay/60)+' min':'—'}</span></div>`))
-        .addTo(map);
-      if(!traficoVis.incidentes) el.style.display='none';
+        .setPopup(new maplibregl.Popup({offset:14}).setHTML(
+          `<div class="popup-title">${icoInc[tipo]||'⚠️'} ${p.description||tipo}</div>
+           <div class="popup-row"><span class="popup-key">Desde</span><span class="popup-val">${p.from||'—'}</span></div>
+           <div class="popup-row"><span class="popup-key">Hasta</span><span class="popup-val">${p.to||'—'}</span></div>
+           <div class="popup-row"><span class="popup-key">Demora</span><span class="popup-val">${p.delay?Math.round(p.delay/60)+' min':'—'}</span></div>`
+        )).addTo(map);
       incMarkers.push(mk);
     });
-    const total=incData.length;
-    document.getElementById('cnt-incidentes').textContent=total+' activos';
-    document.getElementById('num-incidentes').textContent=total;
-    document.getElementById('stat-incidentes').textContent=total;
-    const dot=document.getElementById('trafico-dot');
-    dot.style.background='#39d353'; dot.style.animation='pulse 1.5s infinite';
+    const total = incData.length;
+    ['cnt-incidentes','num-incidentes','stat-incidentes'].forEach(id => document.getElementById(id).textContent = total);
+    const dot = document.getElementById('trafico-dot');
+    dot.classList.add('on');
     renderIncidentes();
-  } catch(e){ document.getElementById('cnt-incidentes').textContent='Verifica API key'; }
+  } catch(e){ document.getElementById('cnt-incidentes').textContent = 'Error API'; }
 }
 
 function renderIncidentes(){
-  const lista=document.getElementById('lista-incidentes');
-  if(!incData.length){ lista.innerHTML='<div class="incidente-empty">✅ Sin incidentes activos</div>'; return; }
-  lista.innerHTML=incData.slice(0,5).map(inc=>{
-    const p=inc.properties||{}, tipo=p.iconCategory||'HAZARD';
-    const coords=inc.geometry?.coordinates; let lat='',lon='';
+  const lista = document.getElementById('lista-incidentes');
+  if(!incData.length){ lista.innerHTML = '<div class="inc-empty">✅ Sin incidentes activos</div>'; return; }
+  lista.innerHTML = incData.slice(0,5).map(inc => {
+    const p = inc.properties||{}, tipo = p.iconCategory||'HAZARD';
+    const coords = inc.geometry?.coordinates; let lat='',lon='';
     if(coords){ if(inc.geometry.type==='Point'){[lon,lat]=coords;}else if(inc.geometry.type==='LineString'){[lon,lat]=coords[0];} }
-    return `<div class="incidente-item" ${lat?`onclick="map.flyTo({center:[${lon},${lat}],zoom:16})"`:''}>
-      <div class="incidente-icon">${icoInc[tipo]||'⚠️'}</div>
-      <div class="incidente-info"><div class="incidente-titulo">${p.description||tipo}</div>
-      <div class="incidente-desc">${p.from||''}${p.delay?' · '+Math.round(p.delay/60)+'min':''}</div></div></div>`;
+    return `<div class="inc-item" ${lat?`onclick="map.flyTo({center:[${lon},${lat}],zoom:17,pitch:55})"`:''}>
+      <div class="inc-icon">${icoInc[tipo]||'⚠️'}</div>
+      <div><div class="inc-titulo">${p.description||tipo}</div>
+      <div class="inc-desc">${p.from||''}${p.delay?' · '+Math.round(p.delay/60)+'min':''}</div></div></div>`;
   }).join('');
 }
 
 // ── CLIMA ─────────────────────────────────────────────
-const climaEl=document.createElement('div');
-climaEl.style.cssText='width:38px;height:38px;background:rgba(0,212,255,.15);border:2px solid #00d4ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 12px rgba(0,212,255,.4);';
-climaEl.textContent='🌡️';
-const climaMarker=new maplibregl.Marker({element:climaEl}).setLngLat([LON,LAT]).setPopup(new maplibregl.Popup().setHTML('<div class="popup-title">Cargando clima...</div>')).addTo(map);
+const climaEl = document.createElement('div');
+climaEl.style.cssText = 'width:36px;height:36px;background:rgba(0,212,255,0.12);border:1.5px solid #00d4ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 16px rgba(0,212,255,0.5),inset 0 0 8px rgba(0,212,255,0.1);cursor:pointer;animation:ring2 3s infinite;';
+climaEl.textContent = '🌡️';
+const climaMk = new maplibregl.Marker({element:climaEl}).setLngLat([LON,LAT])
+  .setPopup(new maplibregl.Popup({offset:18}).setHTML('<div class="popup-title">Cargando clima...</div>'))
+  .addTo(map);
 
 async function fetchClima(){
-  try {
-    const c=(await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,precipitation,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m&timezone=America%2FBogota`)).json()).current;
-    document.getElementById('cl-temp').textContent=c.temperature_2m+'°C';
-    document.getElementById('cl-hum').textContent=c.relative_humidity_2m+'%';
-    document.getElementById('cl-viento').textContent=c.wind_speed_10m+' km/h';
-    document.getElementById('cl-lluvia').textContent=c.precipitation+' mm';
-    document.getElementById('cl-presion').textContent=c.surface_pressure+' hPa';
-    document.getElementById('cl-nube').textContent=c.cloud_cover+'%';
-    const dot=document.getElementById('clima-dot'); dot.classList.remove('offline'); dot.style.background='#39d353';
-    const dirs=['N','NE','E','SE','S','SO','O','NO'];
-    climaMarker.getPopup().setHTML(`<div class="popup-title">🌡️ Estación Climática — Turbaco</div><div class="popup-row"><span class="popup-key">Temperatura</span><span class="popup-val">${c.temperature_2m}°C</span></div><div class="popup-row"><span class="popup-key">Humedad</span><span class="popup-val">${c.relative_humidity_2m}%</span></div><div class="popup-row"><span class="popup-key">Viento</span><span class="popup-val">${c.wind_speed_10m} km/h ${dirs[Math.round((c.wind_direction_10m??0)/45)%8]??'N'}</span></div><div class="popup-row"><span class="popup-key">Lluvia</span><span class="popup-val">${c.precipitation} mm</span></div><div style="font-size:9px;color:#586069;margin-top:6px">Open-Meteo · ${new Date().toLocaleTimeString('es-CO')}</div>`);
-  } catch(e){ console.warn('Error clima',e); }
+  try{
+    const c = (await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,precipitation,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m&timezone=America%2FBogota`)).json()).current;
+    document.getElementById('cl-temp').textContent = c.temperature_2m+'°C';
+    document.getElementById('cl-hum').textContent = c.relative_humidity_2m+'%';
+    document.getElementById('cl-viento').textContent = c.wind_speed_10m+' km/h';
+    document.getElementById('cl-lluvia').textContent = c.precipitation+' mm';
+    document.getElementById('cl-presion').textContent = c.surface_pressure+' hPa';
+    document.getElementById('cl-nube').textContent = c.cloud_cover+'%';
+    document.getElementById('clima-dot').classList.add('on');
+    const dirs = ['N','NE','E','SE','S','SO','O','NO'];
+    climaMk.getPopup().setHTML(
+      `<div class="popup-title">🌡️ Estación Climática — Turbaco</div>
+       <div class="popup-row"><span class="popup-key">Temperatura</span><span class="popup-val">${c.temperature_2m}°C</span></div>
+       <div class="popup-row"><span class="popup-key">Humedad</span><span class="popup-val">${c.relative_humidity_2m}%</span></div>
+       <div class="popup-row"><span class="popup-key">Viento</span><span class="popup-val">${c.wind_speed_10m} km/h ${dirs[Math.round((c.wind_direction_10m??0)/45)%8]??'N'}</span></div>
+       <div class="popup-row"><span class="popup-key">Lluvia</span><span class="popup-val">${c.precipitation} mm</span></div>
+       <div style="font-size:8px;color:var(--text-muted);margin-top:8px">Open-Meteo · ${new Date().toLocaleTimeString('es-CO')}</div>`
+    );
+  } catch(e){ console.warn('Error clima', e); }
 }
 
 // ── ARRANQUE ──────────────────────────────────────────
 map.on('load', async () => {
-  advanceLoad(20,'Cargando vías...');
+  load(20,'Cargando vías...');
   await loadLayer('vias');
   await loadLayer('vias_principales');
-  advanceLoad(50,'Cargando edificios 3D...');
-  layerVisible.edificios = true;
-  document.getElementById('tog-edif').classList.add('active');
+
+  load(55,'Cargando edificios 3D...');
   await loadLayer('edificios');
-  advanceLoad(70,'Conectando TomTom...');
+
+  load(75,'Conectando TomTom...');
   await fetchIncidentes(); setInterval(fetchIncidentes, 2*60*1000);
-  advanceLoad(85,'Cargando clima...');
+
+  load(90,'Cargando clima...');
   await fetchClima(); setInterval(fetchClima, 5*60*1000);
-  advanceLoad(100,'Gemelo 3D listo.');
-  setTimeout(()=>{ document.getElementById('loading').classList.add('hidden'); showNotif('Smart Turbaco 3D v0.3 activo ✓'); }, 500);
+
+  load(100,'Gemelo Digital 3D listo.');
+  setTimeout(()=>{ document.getElementById('loading').classList.add('hidden'); notif('Smart Turbaco 3D · Online ✓'); }, 500);
 });
 </script>
 </body>
